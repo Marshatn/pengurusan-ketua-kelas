@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CheckCircle2, Clock, ShieldCheck, UserCheck, Search, Filter, Lock, Users } from 'lucide-react';
 import { VoteRecord } from '../types';
+import { INITIAL_TEACHER_RECORDS } from '../data/initialData';
 
 interface TeacherVoterListProps {
   votes: VoteRecord[];
@@ -26,11 +27,19 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
   // Aggregate teacher voting records
   const teacherStatusList = useMemo(() => {
     return teachers.map((teacherName) => {
-      // Find all votes matching this teacher
+      // Find all votes matching this teacher flexibly (exact name, voterId equals IC or name, or case-insensitive contains)
       const matchingVotes = yearVotes.filter((v) => {
-        const matchesName = v.voterName && v.voterName.trim().toUpperCase() === teacherName.trim().toUpperCase();
-        const matchesId = v.voterId && v.voterId.trim().toUpperCase() === teacherName.trim().toUpperCase();
-        return matchesName || matchesId;
+        const vName = (v.voterName || '').trim().replace(/\s+/g, ' ').toUpperCase();
+        const vId = (v.voterId || '').trim().replace(/[-\s]/g, '').toUpperCase();
+        const tName = teacherName.trim().replace(/\s+/g, ' ').toUpperCase();
+
+        const matchedRecord = INITIAL_TEACHER_RECORDS.find((r) => r.name.trim().replace(/\s+/g, ' ').toUpperCase() === tName);
+        const tIc = matchedRecord ? matchedRecord.ic.replace(/[-\s]/g, '').toUpperCase() : '';
+
+        const matchIc = tIc && (vId === tIc || vName === tIc);
+        const matchName = vName === tName || vId === tName || vName.includes(tName) || tName.includes(vName) || vId.includes(tName);
+
+        return matchIc || matchName;
       });
 
       const uniqueCategories = new Set(matchingVotes.map((v) => v.category));
