@@ -96,7 +96,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
 <body>
   <div class="header">
     <h1 class="school-title">SJK (C) CHUNG HWA KOTA BELUD</h1>
-    <h2 class="school-subtitle">古打毛律中华学校 · PETI SURAT 45, 89157 KOTA BELUD, SABAH</h2>
+    <h2 class="school-subtitle">古打毛律中华学校 · PETI SURAT 14, 89157 KOTA BELUD, SABAH</h2>
     <div class="doc-title">SENARAI RASMI KETUA KELAS & PENOLONG KETUA KELAS (18 KELAS)</div>
     <div class="session-info">SESI AKADEMIK TAHUN ${selectedYear} · TARIKH CETAKAN: ${new Date().toLocaleDateString('ms-MY')}</div>
   </div>
@@ -441,7 +441,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                   SJK (C) CHUNG HWA KOTA BELUD
                 </h4>
                 <p className="text-xs font-bold text-amber-700">
-                  古打毛律中华学校 · PETI SURAT 45, 89157 KOTA BELUD, SABAH
+                  古打毛律中华学校 · PETI SURAT 14, 89157 KOTA BELUD, SABAH
                 </p>
                 <h5 className="text-sm font-extrabold text-blue-900 uppercase mt-2">
                   SENARAI RASMI KETUA KELAS & PENOLONG KETUA KELAS (18 KELAS)

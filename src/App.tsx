@@ -9,8 +9,8 @@ import { TabAdmin } from './components/TabAdmin';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
-import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, TEACHER_LIST } from './data/initialData';
-import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession } from './types';
+import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, TEACHER_LIST, INITIAL_TEACHER_RECORDS } from './data/initialData';
+import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
 
 export default function App() {
   const [lang, setLang] = useState<'ms' | 'zh'>('ms');
@@ -26,18 +26,32 @@ export default function App() {
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
   const [activeTab, setActiveTab] = useState<string>('classes');
 
-  // Teachers master list
-  const [teachers, setTeachers] = useState<string[]>(() => {
-    const saved = localStorage.getItem('sistem_pemimpin_teachers');
-    if (saved) {
+  // Teachers master list with Name and IC support
+  const [teachers, setTeachers] = useState<TeacherRecord[]>(() => {
+    const savedV2 = localStorage.getItem('sistem_pemimpin_teachers_v2');
+    if (savedV2) {
       try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((t: string) => !t.toUpperCase().includes('ERIC CHUNG'));
+        const parsed = JSON.parse(savedV2);
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].name) {
+          return parsed.filter((t: TeacherRecord) => !t.name.toUpperCase().includes('ERIC CHUNG'));
         }
       } catch { /* ignore */ }
     }
-    return TEACHER_LIST.filter((t) => !t.toUpperCase().includes('ERIC CHUNG'));
+    const legacySaved = localStorage.getItem('sistem_pemimpin_teachers');
+    if (legacySaved) {
+      try {
+        const parsed = JSON.parse(legacySaved);
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
+          return parsed
+            .filter((t: string) => !t.toUpperCase().includes('ERIC CHUNG'))
+            .map((name: string, idx: number) => {
+              const matched = INITIAL_TEACHER_RECORDS.find((r) => r.name.toUpperCase() === name.toUpperCase());
+              return matched || { name, ic: `85010112${String(idx + 1).padStart(4, '0')}` };
+            });
+        }
+      } catch { /* ignore */ }
+    }
+    return INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG'));
   });
 
   const [classesByYear, setClassesByYear] = useState<{ [year: number]: ClassLeaderData[] }>(() => {
@@ -105,7 +119,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('sistem_pemimpin_teachers', JSON.stringify(teachers));
+    localStorage.setItem('sistem_pemimpin_teachers_v2', JSON.stringify(teachers));
+    localStorage.setItem('sistem_pemimpin_teachers', JSON.stringify(teachers.map((t) => t.name)));
   }, [teachers]);
 
   useEffect(() => {
@@ -142,13 +157,17 @@ export default function App() {
     });
   };
 
-  const handleAddTeacher = (name: string) => {
-    if (teachers.includes(name)) return;
-    setTeachers((prev) => [...prev, name].sort());
+  const teacherNames = teachers.map((t) => t.name);
+
+  const handleAddTeacher = (name: string, ic: string) => {
+    const cleanName = name.trim().toUpperCase();
+    const cleanIc = ic.trim().replace(/[-\s]/g, '');
+    if (teachers.some((t) => t.name.toUpperCase() === cleanName || t.ic === cleanIc)) return;
+    setTeachers((prev) => [...prev, { name: cleanName, ic: cleanIc }].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const handleRemoveTeacher = (name: string) => {
-    setTeachers((prev) => prev.filter((th) => th !== name));
+    setTeachers((prev) => prev.filter((th) => th.name.toUpperCase() !== name.toUpperCase()));
   };
 
   const handleCastVote = (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => {
@@ -169,7 +188,7 @@ export default function App() {
 
   const handleResetData = () => {
     setClassesByYear({ 2026: INITIAL_CLASSES_2026 });
-    setTeachers(TEACHER_LIST.filter((t) => !t.toUpperCase().includes('ERIC CHUNG')));
+    setTeachers(INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG')));
     setVotes([]);
     setChecklist(INITIAL_CHECKLIST);
     setSettings(INITIAL_SETTINGS);
@@ -215,7 +234,7 @@ export default function App() {
                 user={user}
                 addToast={addToast}
                 lang={lang}
-                teachers={teachers}
+                teachers={teacherNames}
               />
             )}
 
@@ -229,7 +248,7 @@ export default function App() {
                 settings={settings}
                 addToast={addToast}
                 lang={lang}
-                teachers={teachers}
+                teachers={teacherNames}
               />
             )}
 
@@ -243,13 +262,20 @@ export default function App() {
             )}
 
             {activeTab === 'leaderboard' && (
-              <TabLeaderboard
-                votes={votes}
-                classesData={currentClasses}
-                selectedYear={selectedYear}
-                lang={lang}
-                teachers={teachers}
-              />
+              user.role === 'admin' ? (
+                <TabLeaderboard
+                  votes={votes}
+                  classesData={currentClasses}
+                  selectedYear={selectedYear}
+                  lang={lang}
+                  teachers={teacherNames}
+                />
+              ) : (
+                <div className="p-8 rounded-3xl bg-amber-50 border border-amber-200 text-center max-w-xl mx-auto shadow-sm">
+                  <h3 className="text-lg font-bold text-slate-800">Akses Terhad Pentadbir</h3>
+                  <p className="text-xs text-slate-600 mt-1">Papan analisis dan keputusan undian hanya boleh diakses oleh pihak Pentadbir / Admin.</p>
+                </div>
+              )
             )}
 
             {activeTab === 'admin' && (

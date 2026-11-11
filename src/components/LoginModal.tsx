@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ShieldCheck, UserCheck, Lock, User, KeyRound, Globe, AlertCircle } from 'lucide-react';
-import { Role, UserSession } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, UserCheck, Lock, User, KeyRound, Globe, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { Role, UserSession, TeacherRecord } from '../types';
 import { NeonBackground } from './NeonBackground';
 import { t } from '../translations';
 
@@ -9,15 +9,62 @@ interface LoginModalProps {
   onLogin: (session: UserSession) => void;
   lang: 'ms' | 'zh';
   setLang: (lang: 'ms' | 'zh') => void;
-  teachers: string[];
+  teachers: (TeacherRecord | string)[];
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, setLang, teachers }) => {
+  // Normalize teachers into TeacherRecord[]
+  const normalizedTeachers: TeacherRecord[] = teachers.map((th, idx) => {
+    if (typeof th === 'string') {
+      return { name: th, ic: `85010112${String(idx + 1).padStart(4, '0')}` };
+    }
+    return th;
+  });
+
   const [selectedRole, setSelectedRole] = useState<Role>('teacher');
-  const [selectedTeacher, setSelectedTeacher] = useState<string>(teachers[0] || 'CHIA MEE HIE');
+  const [selectedTeacher, setSelectedTeacher] = useState<string>(
+    normalizedTeachers[0]?.name || 'CHIA MEE HIE'
+  );
   const [adminUsername, setAdminUsername] = useState('admin');
   const [password, setPassword] = useState('');
+  const [detectedTeacherName, setDetectedTeacherName] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  // When selected teacher changes from dropdown, auto-fill/suggest their registered IC if available
+  const handleSelectTeacherChange = (teacherName: string) => {
+    setSelectedTeacher(teacherName);
+    setError('');
+    const matched = normalizedTeachers.find(
+      (t) => t.name.toUpperCase() === teacherName.toUpperCase()
+    );
+    if (matched && matched.ic) {
+      setPassword(matched.ic);
+      setDetectedTeacherName(matched.name);
+    }
+  };
+
+  // When user types in password / IC field, auto-detect the teacher by IC!
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    setError('');
+
+    if (selectedRole === 'teacher') {
+      const clean = val.trim().replace(/[-\s]/g, '');
+      if (clean.length >= 6) {
+        const matched = normalizedTeachers.find(
+          (t) => t.ic.replace(/[-\s]/g, '') === clean
+        );
+        if (matched) {
+          setSelectedTeacher(matched.name);
+          setDetectedTeacherName(matched.name);
+        } else {
+          setDetectedTeacherName(null);
+        }
+      } else {
+        setDetectedTeacherName(null);
+      }
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -31,30 +78,35 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
       if (adminUsername.trim().toLowerCase() === 'admin' && password.trim() === 'mptan') {
         onLogin({ role: 'admin', username: 'admin', name: 'Admin / Guru Penasihat Utama' });
       } else {
-        setError(lang === 'ms' ? 'ID Staff atau Kata Laluan Admin tidak sah. (Password: mptan)' : '用户名或管理员密码无效。(密码: mptan)');
+        setError(
+          lang === 'ms'
+            ? 'ID Staff atau Kata Laluan Admin tidak sah. (Password: mptan)'
+            : '用户名或管理员密码无效。(密码: mptan)'
+        );
       }
     } else if (selectedRole === 'teacher') {
-      if (!selectedTeacher) {
-        setError(lang === 'ms' ? 'Sila pilih nama guru anda.' : '请选择您的教师姓名。');
-        return;
-      }
-
-      // Password for teachers is their IC number without '-'
       const cleanIC = password.trim().replace(/[-\s]/g, '');
 
       if (!/^\d{10,12}$/.test(cleanIC)) {
         setError(
           lang === 'ms'
-            ? 'Kata laluan mestilah nombor Kad Pengenalan (IC) tanpa tanda "-" (contoh: 880215125544).'
-            : '密码必须是身份证号码（IC），不含符号"-"（例如：880215125544）。'
+            ? 'Sila masukkan nombor Kad Pengenalan (IC) sah (10 - 12 digit nombor tanpa tanda "-").'
+            : '请输入有效的身份证号码（IC）（10至12位数字，不含符号"-"）。'
         );
         return;
       }
 
+      // Check if IC matches a registered teacher
+      const matchedByIC = normalizedTeachers.find(
+        (t) => t.ic.replace(/[-\s]/g, '') === cleanIC
+      );
+
+      const finalTeacherName = matchedByIC?.name || selectedTeacher;
+
       onLogin({
         role: 'teacher',
         username: cleanIC,
-        name: selectedTeacher,
+        name: finalTeacherName,
       });
     }
   };
@@ -63,11 +115,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
     setSelectedRole(role);
     setError('');
     setPassword('');
+    setDetectedTeacherName(null);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden select-none bg-[#040714]">
-      {/* Slow Moving Automatic Neon Background (No mouse interaction needed) */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden select-none">
+      {/* Bright & Luminous Ambient Background */}
       <NeonBackground variant="login" />
 
       {/* Language Switcher in Corner */}
@@ -75,18 +128,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
         <button
           type="button"
           onClick={() => setLang(lang === 'ms' ? 'zh' : 'ms')}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-cyan-300 bg-[#0F172A]/85 hover:bg-[#0F172A] border border-cyan-400/40 rounded-xl transition shadow-lg backdrop-blur-md"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-white/90 hover:bg-white border border-sky-300 rounded-xl transition shadow-lg backdrop-blur-md cursor-pointer"
         >
-          <Globe className="w-3.5 h-3.5 text-cyan-400" />
+          <Globe className="w-3.5 h-3.5 text-amber-500" />
           <span>{lang === 'ms' ? '中文 (ZH)' : 'BM'}</span>
         </button>
       </div>
 
-      {/* Frosted Glass Login Card with Neon Glow Accents */}
-      <div className="relative z-10 w-full max-w-lg rounded-3xl bg-[#0B1124]/90 backdrop-blur-2xl border-2 border-cyan-400/40 shadow-[0_0_50px_rgba(6,182,212,0.25)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      {/* Clean, Bright Frosted Glass Login Card */}
+      <div className="relative z-10 w-full max-w-lg rounded-3xl bg-white/95 backdrop-blur-xl border border-sky-200/90 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.25)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-900">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#070D1E] via-blue-950/80 to-[#070D1E] p-6 text-white text-center relative border-b border-cyan-500/20">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-3 shadow-lg shadow-cyan-500/20 border-2 border-amber-300 overflow-hidden p-1">
+        <div className="bg-gradient-to-r from-[#0F172A] via-blue-900 to-[#0F172A] p-6 text-white text-center relative border-b border-amber-400/30">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-3 shadow-lg border-2 border-amber-300 overflow-hidden p-1">
             <img
               src="/school_logo.jpg"
               alt="Logo SJK (C) Chung Hwa Kota Belud"
@@ -98,74 +151,85 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
           <p className="text-xs text-amber-300 mt-1 font-medium">{dict.subtitle}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-[#0B1124]/70 text-slate-100">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-white text-slate-800">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
               {dict.roleLabel}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => handleRoleChange('teacher')}
-                className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-xs font-bold transition ${
+                className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-xs font-bold transition cursor-pointer ${
                   selectedRole === 'teacher'
-                    ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] scale-[1.02]'
-                    : 'border-slate-800 bg-slate-900/80 text-slate-400 hover:border-slate-700'
+                    ? 'border-amber-400 bg-amber-50/90 text-slate-900 shadow-sm scale-[1.02]'
+                    : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300'
                 }`}
               >
-                <UserCheck className="w-5 h-5 mb-1.5 text-cyan-400" />
+                <UserCheck className="w-5 h-5 mb-1.5 text-amber-500" />
                 <span>{dict.teacherRole}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleRoleChange('admin')}
-                className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-xs font-bold transition ${
+                className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-xs font-bold transition cursor-pointer ${
                   selectedRole === 'admin'
-                    ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] scale-[1.02]'
-                    : 'border-slate-800 bg-slate-900/80 text-slate-400 hover:border-slate-700'
+                    ? 'border-amber-400 bg-amber-50/90 text-slate-900 shadow-sm scale-[1.02]'
+                    : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300'
                 }`}
               >
-                <ShieldCheck className="w-5 h-5 mb-1.5 text-cyan-400" />
+                <ShieldCheck className="w-5 h-5 mb-1.5 text-amber-500" />
                 <span>{dict.adminRole}</span>
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-2xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs font-semibold flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           <div className="space-y-4">
             {selectedRole === 'teacher' ? (
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  {dict.selectTeacher}
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                    <User className="w-4 h-4" />
-                  </span>
-                  <select
-                    value={selectedTeacher}
-                    onChange={(e) => setSelectedTeacher(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-slate-700 bg-slate-900/95 py-2.5 pl-10 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                  >
-                    {teachers.map((th) => (
-                      <option key={th} value={th} className="bg-slate-900 text-white">
-                        {th}
-                      </option>
-                    ))}
-                  </select>
+              <>
+                {/* Teacher Selection Dropdown */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    {dict.selectTeacher}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                      <User className="w-4 h-4" />
+                    </span>
+                    <select
+                      value={selectedTeacher}
+                      onChange={(e) => handleSelectTeacherChange(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    >
+                      {normalizedTeachers.map((th) => (
+                        <option key={th.name} value={th.name} className="text-slate-900">
+                          {th.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
+
+                {/* Auto Detection Banner when matched */}
+                {detectedTeacherName && (
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300/80 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>✓ Guru Dikesan: {detectedTeacherName}</span>
+                  </div>
+                )}
+              </>
             ) : (
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   {dict.staffId}
                 </label>
                 <div className="relative">
@@ -178,7 +242,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
                     placeholder="admin"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-900/95 py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono"
+                    className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 font-mono"
                   />
                 </div>
               </div>
@@ -186,8 +250,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-300">
-                  {selectedRole === 'teacher' ? dict.password : 'Kata Laluan Admin'}
+                <label className="text-xs font-semibold text-slate-700">
+                  {selectedRole === 'teacher' ? 'Nombor Kad Pengenalan (IC Guru)' : 'Kata Laluan Admin'}
                 </label>
               </div>
               <div className="relative">
@@ -195,17 +259,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
                   <KeyRound className="w-4 h-4" />
                 </span>
                 <input
-                  type="password"
+                  type={selectedRole === 'teacher' ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
                   placeholder={selectedRole === 'teacher' ? 'cth: 880215125544' : '••••••'}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900/95 py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono"
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 font-mono"
                 />
               </div>
               {selectedRole === 'teacher' && (
-                <p className="text-[11px] text-amber-300/90 mt-1.5">
-                  {dict.passwordHint}
+                <p className="text-[11px] text-amber-700 mt-1.5 flex items-center gap-1 font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span>Sistem mengesan nama dan IC guru secara automatik.</span>
                 </p>
               )}
             </div>
@@ -213,7 +278,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
 
           <button
             type="submit"
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm shadow-[0_0_20px_rgba(234,179,8,0.3)] transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-xl bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer border border-amber-300"
           >
             <Lock className="w-4 h-4" />
             <span>{dict.submit}</span>

@@ -181,17 +181,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>{dict.tabs.sop}</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'leaderboard'
-                  ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
-                  : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>{dict.tabs.leaderboard}</span>
-            </button>
+            {user.role === 'admin' && (
+              <button
+                onClick={() => setActiveTab('leaderboard')}
+                className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+                  activeTab === 'leaderboard'
+                    ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>{dict.tabs.leaderboard}</span>
+              </button>
+            )}
 
             {user.role === 'admin' && (
               <button
@@ -248,17 +250,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-[10px] font-semibold">SOP</span>
         </button>
 
-        <button
-          onClick={() => setActiveTab('leaderboard')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
-            activeTab === 'leaderboard'
-              ? 'text-amber-400 font-extrabold scale-105'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <BarChart3 className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
-        </button>
+        {user.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
+              activeTab === 'leaderboard'
+                ? 'text-amber-400 font-extrabold scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <BarChart3 className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
+          </button>
+        )}
 
         {user.role === 'admin' && (
           <button

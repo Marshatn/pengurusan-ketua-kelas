@@ -7,6 +7,11 @@ export interface UserSession {
   classId?: string;
 }
 
+export interface TeacherRecord {
+  name: string;
+  ic: string;
+}
+
 export interface ClassLeaderData {
   id: string; // e.g., "1M", "1K", "1B" ... "6B"
   name: string; // e.g., "Tahun 1 Mawar (1M)"
