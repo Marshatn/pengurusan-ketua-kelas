@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Pengurusan & Kepimpinan Pemimpin Murid",
+  "description": "Sistem Pengurusan & Kepimpinan Pemimpin Murid (Ketua & Penolong Ketua Kelas) untuk Sekolah Rendah Malaysia",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
