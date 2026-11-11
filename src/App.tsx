@@ -8,6 +8,7 @@ import { TabLeaderboard } from './components/TabLeaderboard';
 import { TabAdmin } from './components/TabAdmin';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { NeonBackground } from './components/NeonBackground';
 import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, TEACHER_LIST } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession } from './types';
 
@@ -22,22 +23,48 @@ export default function App() {
     return { role: 'admin', username: 'admin', name: 'Admin / Guru Penasihat' };
   });
 
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
   const [activeTab, setActiveTab] = useState<string>('classes');
 
   // Teachers master list
   const [teachers, setTeachers] = useState<string[]>(() => {
     const saved = localStorage.getItem('sistem_pemimpin_teachers');
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((t: string) => !t.toUpperCase().includes('ERIC CHUNG'));
+        }
+      } catch { /* ignore */ }
     }
-    return TEACHER_LIST;
+    return TEACHER_LIST.filter((t) => !t.toUpperCase().includes('ERIC CHUNG'));
   });
 
   const [classesByYear, setClassesByYear] = useState<{ [year: number]: ClassLeaderData[] }>(() => {
     const saved = localStorage.getItem('sistem_pemimpin_classes');
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        const parsed = JSON.parse(saved);
+        const migrated: { [year: number]: ClassLeaderData[] } = {};
+        for (const [yr, list] of Object.entries(parsed)) {
+          migrated[Number(yr)] = (list as ClassLeaderData[]).map((c) => {
+            let newName = c.name
+              .replace(/Mawar/gi, 'Merah')
+              .replace(/Kenanga/gi, 'Kuning')
+              .replace(/Melati/gi, 'Biru');
+            let teacherName = c.teacherName;
+            if (teacherName.toUpperCase().includes('ERIC CHUNG')) {
+              teacherName = 'BENNY BIN RAIJUN';
+            }
+            return {
+              ...c,
+              name: newName,
+              teacherName,
+            };
+          });
+        }
+        return migrated;
+      } catch { /* ignore */ }
     }
     return { 2026: INITIAL_CLASSES_2026 };
   });
@@ -142,7 +169,7 @@ export default function App() {
 
   const handleResetData = () => {
     setClassesByYear({ 2026: INITIAL_CLASSES_2026 });
-    setTeachers(TEACHER_LIST);
+    setTeachers(TEACHER_LIST.filter((t) => !t.toUpperCase().includes('ERIC CHUNG')));
     setVotes([]);
     setChecklist(INITIAL_CHECKLIST);
     setSettings(INITIAL_SETTINGS);
@@ -150,7 +177,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-16">
+    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-24 md:pb-16">
+      {/* Slow Moving Automatic Neon Background for Main App Screen */}
+      <NeonBackground variant="app" />
+
       <LoginModal isOpen={!user} onLogin={(sess) => setUser(sess)} lang={lang} setLang={setLang} teachers={teachers} />
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
@@ -199,6 +229,7 @@ export default function App() {
                 settings={settings}
                 addToast={addToast}
                 lang={lang}
+                teachers={teachers}
               />
             )}
 
@@ -217,6 +248,7 @@ export default function App() {
                 classesData={currentClasses}
                 selectedYear={selectedYear}
                 lang={lang}
+                teachers={teachers}
               />
             )}
 

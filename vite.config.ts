@@ -11,29 +11,42 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        includeAssets: ['school_logo.jpg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'bg_wave.png'],
         manifest: {
           id: '/',
-          name: 'Sistem Pengurusan & Kepimpinan Pemimpin Murid',
-          short_name: 'PemimpinMurid',
-          description: 'Sistem Pengurusan & Kepimpinan Pemimpin Murid (Ketua & Penolong Ketua Kelas)',
-          theme_color: '#1e3a8a',
-          background_color: '#ffffff',
+          name: 'Sistem Kepimpinan Pemimpin Murid',
+          short_name: 'Pemimpin',
+          description: 'Sistem Pengurusan & Kepimpinan Pemimpin Murid SJK (C) Chung Hwa Kota Belud',
+          theme_color: '#0F172A',
+          background_color: '#030712',
           display: 'standalone',
           start_url: '/',
           scope: '/',
           icons: [
             {
-              src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231e3a8a"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-              sizes: '192x192 512x512',
-              type: 'image/svg+xml',
-              purpose: 'any maskable'
-            }
-          ]
+              src: '/pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
+            },
+          ],
         },
         devOptions: {
           enabled: true,
-        }
-      })
+        },
+      }),
     ],
     resolve: {
       alias: {
@@ -41,6 +54,9 @@ export default defineConfig(() => {
       },
     },
     server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: true as const,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

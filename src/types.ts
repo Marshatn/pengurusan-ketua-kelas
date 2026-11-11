@@ -16,11 +16,20 @@ export interface ClassLeaderData {
   assistantPrefect: string; // Penolong Ketua Kelas
 }
 
+export type VoteCategory =
+  | 'ketua_tahap1'
+  | 'ketua_tahap2'
+  | 'penolong_tahap1'
+  | 'penolong_tahap2'
+  | 'ketua'
+  | 'penolong';
+
 export interface VoteRecord {
   id: string;
   year: number;
-  voterId: string; // IC or student ID
-  category: 'ketua' | 'penolong';
+  voterId: string; // IC or teacher/student ID
+  voterName?: string; // Nama Guru / Pengundi
+  category: VoteCategory;
   candidateName: string;
   classId: string;
   timestamp: string;

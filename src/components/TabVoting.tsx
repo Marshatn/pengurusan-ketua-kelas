@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Award, CheckCircle2, Lock, Unlock, Sparkles, ThumbsUp } from 'lucide-react';
-import { ClassLeaderData, VoteRecord, UserSession, SystemSettings } from '../types';
+import { ClassLeaderData, VoteRecord, UserSession, SystemSettings, VoteCategory } from '../types';
+import { TeacherVoterList } from './TeacherVoterList';
 import { t } from '../translations';
 
 interface TabVotingProps {
@@ -12,6 +13,7 @@ interface TabVotingProps {
   settings: SystemSettings;
   addToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
   lang: 'ms' | 'zh';
+  teachers: string[];
 }
 
 export const TabVoting: React.FC<TabVotingProps> = ({
@@ -23,29 +25,73 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   settings,
   addToast,
   lang,
+  teachers,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<'ketua' | 'penolong'>('ketua');
+  const [activeCategory, setActiveCategory] = useState<VoteCategory>('ketua_tahap1');
   const [confirmModalCandidate, setConfirmModalCandidate] = useState<{
     name: string;
     classId: string;
-    category: 'ketua' | 'penolong';
+    category: VoteCategory;
   } | null>(null);
 
   const dict = t[lang].votingTab;
 
-  const candidates = classesData.map((cls) => ({
-    classId: cls.id,
-    className: cls.name,
-    name: activeCategory === 'ketua' ? cls.headPrefect : cls.assistantPrefect,
-  })).filter((c) => c.name && c.name.trim() !== '');
+  const CATEGORIES: { id: VoteCategory; label: string; scope: string; isKetua: boolean; isTahap1: boolean }[] = [
+    {
+      id: 'ketua_tahap1',
+      label: dict.ketuaTahap1,
+      scope: dict.scopeTahap1,
+      isKetua: true,
+      isTahap1: true,
+    },
+    {
+      id: 'ketua_tahap2',
+      label: dict.ketuaTahap2,
+      scope: dict.scopeTahap2,
+      isKetua: true,
+      isTahap1: false,
+    },
+    {
+      id: 'penolong_tahap1',
+      label: dict.penolongTahap1,
+      scope: dict.scopeTahap1,
+      isKetua: false,
+      isTahap1: true,
+    },
+    {
+      id: 'penolong_tahap2',
+      label: dict.penolongTahap2,
+      scope: dict.scopeTahap2,
+      isKetua: false,
+      isTahap1: false,
+    },
+  ];
+
+  const currentCategoryObj = CATEGORIES.find((c) => c.id === activeCategory) || CATEGORIES[0];
+
+  // Tahap 1: Grades 1 - 3, Tahap 2: Grade 6
+  const eligibleClasses = classesData.filter((cls) => {
+    if (currentCategoryObj.isTahap1) {
+      return cls.grade >= 1 && cls.grade <= 3;
+    } else {
+      return cls.grade === 6;
+    }
+  });
+
+  const candidates = eligibleClasses
+    .map((cls) => ({
+      classId: cls.id,
+      className: cls.name,
+      name: currentCategoryObj.isKetua ? cls.headPrefect : cls.assistantPrefect,
+      roleTitle: currentCategoryObj.isKetua ? 'Ketua Kelas' : 'Penolong Ketua Kelas',
+    }))
+    .filter((c) => c.name && c.name.trim() !== '');
 
   const userVotesInYear = votes.filter(
     (v) => v.year === selectedYear && v.voterId === user.username
   );
-  const hasVotedKetua = userVotesInYear.some((v) => v.category === 'ketua');
-  const hasVotedPenolong = userVotesInYear.some((v) => v.category === 'penolong');
 
-  const currentCategoryVoted = activeCategory === 'ketua' ? hasVotedKetua : hasVotedPenolong;
+  const currentCategoryVoted = userVotesInYear.some((v) => v.category === activeCategory);
 
   const handleConfirmVote = () => {
     if (!confirmModalCandidate) return;
@@ -59,6 +105,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
     onCastVote({
       year: selectedYear,
       voterId: user.username,
+      voterName: user.name,
       category: confirmModalCandidate.category,
       candidateName: confirmModalCandidate.name,
       classId: confirmModalCandidate.classId,
@@ -92,43 +139,73 @@ export const TabVoting: React.FC<TabVotingProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex items-center justify-center gap-3">
-        <button
-          onClick={() => setActiveCategory('ketua')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition shadow-sm ${
-            activeCategory === 'ketua'
-              ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-          }`}
-        >
-          <Award className="w-4 h-4" />
-          <span>{dict.ketuaCategory}</span>
-          {hasVotedKetua && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 ml-1" />}
-        </button>
+      {/* 4 Category Selection Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {CATEGORIES.map((cat) => {
+          const isVoted = userVotesInYear.some((v) => v.category === cat.id);
+          const isActive = activeCategory === cat.id;
 
-        <button
-          onClick={() => setActiveCategory('penolong')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition shadow-sm ${
-            activeCategory === 'penolong'
-              ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>{dict.penolongCategory}</span>
-          {hasVotedPenolong && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 ml-1" />}
-        </button>
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`p-4 rounded-2xl text-left transition flex flex-col justify-between border relative ${
+                isActive
+                  ? 'bg-[#EAB308] text-[#0F172A] border-amber-500 shadow-lg shadow-amber-500/20 ring-2 ring-amber-400/50'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-amber-400/40'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+                      isActive
+                        ? 'bg-[#0F172A] text-amber-300'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {cat.isTahap1 ? 'TAHAP I' : 'TAHAP II (Tahun 6)'}
+                  </span>
+                  {isVoted && (
+                    <span
+                      className={`flex items-center gap-1 text-[11px] font-bold ${
+                        isActive ? 'text-slate-950 font-black' : 'text-emerald-500'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{dict.votedBtn}</span>
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-xs font-black leading-tight">{cat.label}</h4>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {currentCategoryVoted && (
-        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 text-xs font-semibold">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span>{dict.votedNotice}</span>
+      {/* Active Category Header Card */}
+      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#EAB308] text-slate-950 flex items-center justify-center shrink-0 shadow-sm">
+            {currentCategoryObj.isKetua ? <Award className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              {currentCategoryObj.label}
+            </h3>
+          </div>
         </div>
-      )}
 
-      {/* Candidates Grid */}
+        {currentCategoryVoted && (
+          <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 self-start sm:self-auto">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <span>{dict.votedNotice}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Candidates Grid - Alphabet badge removed, ONLY student's name displayed */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {candidates.map((cand, idx) => {
           const candidateVotesCount = votes.filter(
@@ -141,11 +218,11 @@ export const TabVoting: React.FC<TabVotingProps> = ({
           return (
             <div
               key={`${cand.classId}-${idx}`}
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between relative overflow-hidden"
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 shadow-xs">
                     {cand.className}
                   </span>
                   <span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-900">
@@ -153,16 +230,14 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3.5 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 font-extrabold flex items-center justify-center text-lg shadow-md border border-amber-300">
-                    {cand.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
-                      {cand.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">{activeCategory === 'ketua' ? 'Ketua Kelas' : 'Penolong Ketua Kelas'}</p>
-                  </div>
+                {/* Only Student Name displayed clearly without single-letter alphabet avatar */}
+                <div className="py-2 mb-4 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white leading-snug">
+                    {cand.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    Jawatan: <span className="font-semibold text-slate-700 dark:text-slate-300">{cand.roleTitle}</span>
+                  </p>
                 </div>
               </div>
 
@@ -175,7 +250,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                     category: activeCategory,
                   })
                 }
-                className={`w-full py-3 px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-2 ${
+                className={`w-full py-3 px-4 rounded-xl font-black text-xs transition flex items-center justify-center gap-2 ${
                   currentCategoryVoted || (!settings.votingOpen && user.role !== 'admin')
                     ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                     : 'bg-[#0F172A] hover:bg-slate-800 text-amber-400 shadow-lg border border-amber-400/40'
@@ -188,6 +263,14 @@ export const TabVoting: React.FC<TabVotingProps> = ({
           );
         })}
       </div>
+
+      {/* Teachers Who Have Voted (Confidential - Student selection hidden) */}
+      <TeacherVoterList
+        votes={votes}
+        teachers={teachers}
+        selectedYear={selectedYear}
+        lang={lang}
+      />
 
       {/* Confirmation Modal */}
       {confirmModalCandidate && (
