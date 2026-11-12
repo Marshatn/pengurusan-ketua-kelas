@@ -186,13 +186,19 @@ export default function App() {
     addToast('Status tugasan dikemaskini!', 'success');
   };
 
-  const handleResetData = () => {
-    setClassesByYear({ 2026: INITIAL_CLASSES_2026 });
+  const handleResetTeachers = () => {
     setTeachers(INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG')));
+    addToast('Senarai guru telah ditetapkan semula.', 'info');
+  };
+
+  const handleResetClasses = () => {
+    setClassesByYear({ 2026: INITIAL_CLASSES_2026 });
+    addToast('Data kelas telah ditetapkan semula.', 'info');
+  };
+
+  const handleResetVotes = () => {
     setVotes([]);
-    setChecklist(INITIAL_CHECKLIST);
-    setSettings(INITIAL_SETTINGS);
-    addToast('Data sistem telah ditetapkan semula kepada asal.', 'info');
+    addToast('Data undian telah ditetapkan semula.', 'info');
   };
 
   return (
@@ -269,6 +275,8 @@ export default function App() {
                   selectedYear={selectedYear}
                   lang={lang}
                   teachers={teacherNames}
+                  user={user}
+                  addToast={addToast}
                 />
               ) : (
                 <div className="p-8 rounded-3xl bg-amber-50 border border-amber-200 text-center max-w-xl mx-auto shadow-sm">
@@ -282,7 +290,9 @@ export default function App() {
               <TabAdmin
                 settings={settings}
                 onUpdateSettings={setSettings}
-                onResetData={handleResetData}
+                onResetTeachers={handleResetTeachers}
+                onResetClasses={handleResetClasses}
+                onResetVotes={handleResetVotes}
                 selectedYear={selectedYear}
                 user={user}
                 addToast={addToast}

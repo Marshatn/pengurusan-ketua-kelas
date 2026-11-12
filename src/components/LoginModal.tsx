@@ -22,48 +22,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
   });
 
   const [selectedRole, setSelectedRole] = useState<Role>('teacher');
-  const [selectedTeacher, setSelectedTeacher] = useState<string>(
-    normalizedTeachers[0]?.name || 'CHIA MEE HIE'
-  );
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [adminUsername, setAdminUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [detectedTeacherName, setDetectedTeacherName] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  // When selected teacher changes from dropdown, auto-fill/suggest their registered IC if available
+  // When selected teacher changes from dropdown
   const handleSelectTeacherChange = (teacherName: string) => {
     setSelectedTeacher(teacherName);
     setError('');
-    const matched = normalizedTeachers.find(
-      (t) => t.name.toUpperCase() === teacherName.toUpperCase()
-    );
-    if (matched && matched.ic) {
-      setPassword(matched.ic);
-      setDetectedTeacherName(matched.name);
-    }
+    // Remove auto-fill of IC
+    setDetectedTeacherName(null);
   };
 
-  // When user types in password / IC field, auto-detect the teacher by IC!
+  // When user types in password / IC field
   const handlePasswordChange = (val: string) => {
     setPassword(val);
     setError('');
-
-    if (selectedRole === 'teacher') {
-      const clean = val.trim().replace(/[-\s]/g, '');
-      if (clean.length >= 6) {
-        const matched = normalizedTeachers.find(
-          (t) => t.ic.replace(/[-\s]/g, '') === clean
-        );
-        if (matched) {
-          setSelectedTeacher(matched.name);
-          setDetectedTeacherName(matched.name);
-        } else {
-          setDetectedTeacherName(null);
-        }
-      } else {
-        setDetectedTeacherName(null);
-      }
-    }
+    // Remove auto-detection based on IC
+    setDetectedTeacherName(null);
   };
 
   if (!isOpen) return null;
@@ -100,13 +78,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
       const matchedByIC = normalizedTeachers.find(
         (t) => t.ic.replace(/[-\s]/g, '') === cleanIC
       );
+      const matchedByName = normalizedTeachers.find(
+        (t) => t.name.toUpperCase() === selectedTeacher.trim().toUpperCase()
+      );
 
-      const finalTeacherName = matchedByIC?.name || selectedTeacher;
+      if (!matchedByIC || !matchedByName || matchedByIC !== matchedByName) {
+        setError(
+          lang === 'ms'
+            ? 'Nama Guru dan Nombor Kad Pengenalan (IC) tidak sepadan.'
+            : '教师姓名与身份证号码（IC）不匹配。'
+        );
+        return;
+      }
 
       onLogin({
         role: 'teacher',
         username: cleanIC,
-        name: finalTeacherName,
+        name: matchedByName.name,
       });
     }
   };
@@ -210,6 +198,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
                       required
                       className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
                     >
+                      <option value="" className="text-slate-500">
+                        {lang === 'ms' ? 'Pilih Nama' : '选择姓名'}
+                      </option>
                       {normalizedTeachers.map((th) => (
                         <option key={th.name} value={th.name} className="text-slate-900">
                           {th.name}
@@ -267,12 +258,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
                   className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 font-mono"
                 />
               </div>
-              {selectedRole === 'teacher' && (
-                <p className="text-[11px] text-amber-700 mt-1.5 flex items-center gap-1 font-medium">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>Sistem mengesan nama dan IC guru secara automatik.</span>
-                </p>
-              )}
+                {/* Auto-detection message removed */}
             </div>
           </div>
 

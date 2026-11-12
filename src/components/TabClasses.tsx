@@ -61,9 +61,9 @@ export const TabClasses: React.FC<TabClassesProps> = ({
         <tr style="background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
           <td style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #b45309;">${c.id}</td>
           <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: bold; color: #0f172a;">${c.name}</td>
-          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; color: #334155;">${c.teacherName}</td>
-          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: 600; color: #1d4ed8;">${c.headPrefect || '-'}</td>
-          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: 600; color: #4338ca;">${c.assistantPrefect || '-'}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; color: #334155;">${c.teacherName.toUpperCase()}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: 600; color: #1d4ed8;">${(c.headPrefect || '-').toUpperCase()}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: 600; color: #4338ca;">${(c.assistantPrefect || '-').toUpperCase()}</td>
         </tr>
       `
       )
@@ -83,7 +83,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
     .doc-title { font-size: 15px; font-weight: 800; color: #1e3a8a; margin: 10px 0 0 0; text-transform: uppercase; }
     .session-info { font-size: 12px; color: #64748b; margin-top: 4px; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11.5px; }
-    th { background: #0f172a; color: #ffffff; padding: 10px 12px; border: 1px solid #0f172a; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    th { background: #000000; color: #ffffff; padding: 10px 12px; border: 1px solid #000000; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
     .signatures { margin-top: 50px; display: flex; justify-content: space-between; page-break-inside: avoid; }
     .sign-box { width: 220px; text-align: center; font-size: 11px; color: #334155; }
     .sign-line { border-bottom: 1px solid #0f172a; height: 60px; margin-bottom: 8px; }
@@ -134,41 +134,20 @@ export const TabClasses: React.FC<TabClassesProps> = ({
 </html>`;
   };
 
-  // Robust Direct Print via hidden iframe (handles iframe sandbox gracefully)
+  // Robust Print using a new window
   const handlePrintDocument = () => {
-    try {
-      const htmlContent = generatePrintableHtml();
-      let printFrame = document.getElementById('app-print-frame') as HTMLIFrameElement;
-      if (!printFrame) {
-        printFrame = document.createElement('iframe');
-        printFrame.id = 'app-print-frame';
-        printFrame.style.position = 'fixed';
-        printFrame.style.right = '0';
-        printFrame.style.bottom = '0';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = '0';
-        document.body.appendChild(printFrame);
-      }
-
-      const frameDoc = printFrame.contentWindow?.document;
-      if (frameDoc) {
-        frameDoc.open();
-        frameDoc.write(htmlContent);
-        frameDoc.close();
-
-        setTimeout(() => {
-          try {
-            printFrame.contentWindow?.focus();
-            printFrame.contentWindow?.print();
-          } catch {
-            window.print();
-          }
-        }, 350);
-      } else {
-        window.print();
-      }
-    } catch {
+    const htmlContent = generatePrintableHtml();
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      // Wait briefly for content rendering
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    } else {
+      // Fallback
       window.print();
     }
   };
@@ -267,7 +246,13 @@ export const TabClasses: React.FC<TabClassesProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="px-3 py-1 text-xs font-extrabold uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 shadow-xs">
+                  <span className={`px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg shadow-xs ${
+                    cls.name.toUpperCase().includes('MERAH') || cls.id.endsWith('M')
+                      ? 'bg-red-500 text-white' 
+                      : cls.name.toUpperCase().includes('BIRU') || cls.id.endsWith('B')
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-amber-400 text-slate-950'
+                  }`}>
                     Kelas {cls.id}
                   </span>
                   {isRecentlySaved ? (
@@ -320,7 +305,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                         ))}
                       </select>
                     ) : (
-                      <p className="font-extrabold text-slate-800 dark:text-slate-100">{cls.teacherName}</p>
+                      <p className="font-extrabold text-slate-800 dark:text-slate-100">{cls.teacherName.toUpperCase()}</p>
                     )}
                   </div>
 
@@ -340,7 +325,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                         placeholder="Nama Ketua Kelas"
                       />
                     ) : (
-                      <p className="font-black text-blue-900 dark:text-blue-200 text-sm">{cls.headPrefect || '-'}</p>
+                      <p className="font-black text-blue-900 dark:text-blue-200 text-sm">{(cls.headPrefect || '-').toUpperCase()}</p>
                     )}
                   </div>
 
@@ -361,7 +346,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                       />
                     ) : (
                       <p className="font-black text-indigo-900 dark:text-indigo-200 text-sm">
-                        {cls.assistantPrefect || '-'}
+                        {(cls.assistantPrefect || '-').toUpperCase()}
                       </p>
                     )}
                   </div>
@@ -454,7 +439,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900 text-white font-bold text-[11px] uppercase tracking-wider">
+                    <tr className="bg-black text-white font-bold text-[11px] uppercase tracking-wider">
                       <th className="p-2.5 border border-slate-900 text-center w-12">Kod</th>
                       <th className="p-2.5 border border-slate-900">Nama Kelas</th>
                       <th className="p-2.5 border border-slate-900">Guru Kelas</th>
@@ -469,12 +454,12 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                           {c.id}
                         </td>
                         <td className="p-2.5 border border-slate-300 font-bold text-slate-900">{c.name}</td>
-                        <td className="p-2.5 border border-slate-300 text-slate-700">{c.teacherName}</td>
+                        <td className="p-2.5 border border-slate-300 text-slate-700">{c.teacherName.toUpperCase()}</td>
                         <td className="p-2.5 border border-slate-300 font-semibold text-blue-700">
-                          {c.headPrefect || '-'}
+                          {(c.headPrefect || '-').toUpperCase()}
                         </td>
                         <td className="p-2.5 border border-slate-300 font-semibold text-indigo-700">
-                          {c.assistantPrefect || '-'}
+                          {(c.assistantPrefect || '-').toUpperCase()}
                         </td>
                       </tr>
                     ))}

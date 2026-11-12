@@ -84,9 +84,7 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
         return item.name.toLowerCase().includes(searchQuery.toLowerCase());
       })
       .sort((a, b) => {
-        // Voted teachers first, then alphabetical
-        if (a.hasVoted && !b.hasVoted) return -1;
-        if (!a.hasVoted && b.hasVoted) return 1;
+        // Purely alphabetical sorting
         return a.name.localeCompare(b.name);
       });
   }, [teacherStatusList, filter, searchQuery]);
@@ -253,14 +251,14 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
                 </div>
 
                 {teacher.hasVoted ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    <span>{lang === 'ms' ? 'Telah Mengundi' : '已投票'}</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${teacher.categoriesVoted === 4 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'}`}>
+                    <CheckCircle2 className={`w-3 h-3 ${teacher.categoriesVoted === 4 ? 'text-emerald-400' : 'text-cyan-400'}`} />
+                    <span>{teacher.categoriesVoted === 4 ? (lang === 'ms' ? 'Terima kasih. 感恩您' : 'Terima kasih. 感恩您') : (lang === 'ms' ? 'Telah Mengundi' : '已投票')}</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
-                    <Clock className="w-3 h-3 text-slate-400" />
-                    <span>{lang === 'ms' ? 'Belum' : '未投'}</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0">
+                    <Clock className="w-3 h-3 text-rose-400" />
+                    <span>{lang === 'ms' ? 'Belum Selesai' : '未完成'}</span>
                   </span>
                 )}
               </div>
@@ -329,14 +327,14 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
                   </td>
                   <td className="py-3 px-4 text-center">
                     {teacher.hasVoted ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                        <span>{lang === 'ms' ? 'Telah Mengundi' : '已投票'}</span>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${teacher.categoriesVoted === 4 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'}`}>
+                        <CheckCircle2 className={`w-3 h-3 ${teacher.categoriesVoted === 4 ? 'text-emerald-400' : 'text-cyan-400'}`} />
+                        <span>{teacher.categoriesVoted === 4 ? (lang === 'ms' ? 'Terima kasih. 感恩您' : 'Terima kasih. 感恩您') : (lang === 'ms' ? 'Telah Mengundi' : '已投票')}</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        <span>{lang === 'ms' ? 'Belum Mengundi' : '未投票'}</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                        <Clock className="w-3 h-3 text-rose-400" />
+                        <span>{lang === 'ms' ? 'Belum Selesai' : '未完成'}</span>
                       </span>
                     )}
                   </td>

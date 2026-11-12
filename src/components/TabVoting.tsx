@@ -130,7 +130,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
               {settings.votingOpen ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
               {settings.votingOpen ? `${dict.votingOpen} (${selectedYear})` : dict.votingClosed}
             </span>
-            <span className="text-xs text-amber-300 font-mono">ID: {user.username} ({user.role})</span>
+            {/* ID display removed per user request */}
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-white">{dict.bannerTitle}</h2>
           <p className="text-sm text-amber-200/90 mt-1 max-w-2xl">
@@ -222,7 +222,13 @@ export const TabVoting: React.FC<TabVotingProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 shadow-xs">
+                  <span className={`px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg shadow-xs ${
+                    cand.className.toUpperCase().includes('MERAH') || cand.classId.endsWith('M')
+                      ? 'bg-red-500 text-white' 
+                      : cand.className.toUpperCase().includes('BIRU') || cand.classId.endsWith('B')
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-amber-400 text-slate-950'
+                  }`}>
                     {cand.className}
                   </span>
                   <span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-900">

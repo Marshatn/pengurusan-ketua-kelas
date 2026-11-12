@@ -45,15 +45,23 @@ export const TabSop: React.FC<TabSopProps> = ({ lang }) => {
             <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                <span><strong>Kawalan Disiplin:</strong> Menjaga ketenteraman kelas dan mengawal suasana senyap semasa ketiadaan guru.</span>
+                <span><strong>Mengawal Disiplin:</strong> Memastikan rakan-rakan mematuhi peraturan sekolah dan menjaga senyap atau tertib semasa ketiadaan guru di dalam kelas.</span>
               </li>
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-                <span><strong>Doa & Ikrar:</strong> Memimpin bacaan doa pagi, ikrar rukun negara serta memberi salam hormat kepada guru.</span>
+                <span><strong>Mencari Guru:</strong> Memaklumkan atau mendapatkan guru sekiranya guru masih belum masuk ke kelas selepas 5 minit masa pembelajaran bermula.</span>
               </li>
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-                <span><strong>Keselamatan Rehat:</strong> Memastikan keselamatan murid di dalam kelas sewaktu waktu rehat.</span>
+                <span><strong>Pengurusan Buku Kawalan:</strong> Bertanggungjawab menguruskan, menghantar, dan menyimpan buku kawalan kelas (atau buku MMI) mengikut ditetapkan.</span>
+              </li>
+              <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                <span><strong>Mengetuai Aktiviti:</strong> Memimpin murid ketika menjalankan aktiviti dalam kelas atau barisan di luar kelas.</span>
+              </li>
+              <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">5</span>
+                <span><strong>Melaporkan Masalah:</strong> Melaporkan sebarang kemalangan, kerosakan, atau masalah disiplin kepada guru kelas, guru bertugas, atau guru disiplin.</span>
               </li>
             </ul>
           </div>
@@ -73,15 +81,19 @@ export const TabSop: React.FC<TabSopProps> = ({ lang }) => {
             <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-                <span><strong>Pemangku Tugas:</strong> Mengambil alih tugas Ketua Kelas semasa ketiadaan Ketua Kelas.</span>
+                <span><strong>Membantu Ketua Kelas:</strong> Mengambil alih tugas ketua kelas serta membantu memantau disiplin dan kebersihan kelas terutamanya ketika ketua kelas tiada.</span>
               </li>
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-                <span><strong>Kebersihan:</strong> Menyemak kebersihan fizikal kelas (papan putih dipadam, bakul sampah dikosongkan).</span>
+                <span><strong>Menjaga Kebersihan dan Keceriaan:</strong> Memastikan kelas sentiasa berada dalam keadaan bersih, kemas, selamat, dan ceria dengan mengarahkan Ahli Jawatankuasa (AJK) kebersihan.</span>
               </li>
               <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-                <span><strong>Penjimatan Tenaga:</strong> Memastikan suis lampu dan kipas dimatikan sewaktu keluar kelas atau waktu balik.</span>
+                <span><strong>Menyokong Pengawas:</strong> Membantu barisan pengawas sekolah mengawal tingkah laku pelajar dan memastikan kekemasan diri (pakaian seragam, rambut) rakan sekelas.</span>
+              </li>
+              <li className="flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                <span><strong>Kerjasama Tugas:</strong> Bekerjasama dengan AJK kelas yang lain untuk memastikan fungsi organisasi kelas berjalan lancar.</span>
               </li>
             </ul>
           </div>

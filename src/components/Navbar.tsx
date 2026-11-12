@@ -89,10 +89,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               })}
             </div>
 
-            {/* Right Actions: PWA Install + Language Switcher + Logout */}
+            {/* Right Actions: User Name Badge + Language Switcher + Logout */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* PWA Install Button */}
-              <PWAInstallButton lang={lang} />
+              {/* User Name Badge */}
+              <div className="hidden md:flex items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-amber-400/30 text-xs text-amber-300 font-bold shadow-inner">
+                <User className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="line-clamp-1 max-w-[180px]">{user.name}</span>
+              </div>
 
               {/* Language Toggle */}
               <button
@@ -181,33 +184,41 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>{dict.tabs.sop}</span>
             </button>
 
-            {user.role === 'admin' && (
-              <button
-                onClick={() => setActiveTab('leaderboard')}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
-                  activeTab === 'leaderboard'
-                    ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>{dict.tabs.leaderboard}</span>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (user.role === 'admin') setActiveTab('leaderboard');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all ${
+                user.role !== 'admin'
+                  ? 'text-slate-500 bg-slate-800/40 opacity-70 cursor-not-allowed'
+                  : activeTab === 'leaderboard'
+                  ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold cursor-pointer'
+                  : 'text-slate-300 hover:bg-slate-800/80 hover:text-white cursor-pointer'
+              }`}
+              title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>{dict.tabs.leaderboard}</span>
+              {user.role !== 'admin' && <Lock className="w-3 h-3 ml-1 text-amber-400" />}
+            </button>
 
-            {user.role === 'admin' && (
-              <button
-                onClick={() => setActiveTab('admin')}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
-                  activeTab === 'admin'
-                    ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                <span>{dict.tabs.admin}</span>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (user.role === 'admin') setActiveTab('admin');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all ${
+                user.role !== 'admin'
+                  ? 'text-slate-500 bg-slate-800/40 opacity-70 cursor-not-allowed'
+                  : activeTab === 'admin'
+                  ? 'bg-[#EAB308] text-[#0F172A] shadow-lg shadow-amber-500/20 font-extrabold cursor-pointer'
+                  : 'text-slate-300 hover:bg-slate-800/80 hover:text-white cursor-pointer'
+              }`}
+              title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
+            >
+              <Settings className="w-4 h-4" />
+              <span>{dict.tabs.admin}</span>
+              {user.role !== 'admin' && <Lock className="w-3 h-3 ml-1 text-amber-400" />}
+            </button>
           </div>
         </div>
       </header>
@@ -250,33 +261,53 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-[10px] font-semibold">SOP</span>
         </button>
 
-        {user.role === 'admin' && (
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'leaderboard'
-                ? 'text-amber-400 font-extrabold scale-105'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
+        <button
+          onClick={() => {
+            if (user.role === 'admin') setActiveTab('leaderboard');
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition relative ${
+            user.role !== 'admin'
+              ? 'text-slate-600 opacity-60 cursor-not-allowed'
+              : activeTab === 'leaderboard'
+              ? 'text-amber-400 font-extrabold scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}
+          title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
+        >
+          <div className="relative">
             <BarChart3 className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
-          </button>
-        )}
+            {user.role !== 'admin' && (
+              <span className="absolute -top-1 -right-2 bg-slate-900 rounded-full p-0.5 border border-slate-700">
+                <Lock className="w-2.5 h-2.5 text-amber-400" />
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
+        </button>
 
-        {user.role === 'admin' && (
-          <button
-            onClick={() => setActiveTab('admin')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'admin'
-                ? 'text-amber-400 font-extrabold scale-105'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
+        <button
+          onClick={() => {
+            if (user.role === 'admin') setActiveTab('admin');
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition relative ${
+            user.role !== 'admin'
+              ? 'text-slate-600 opacity-60 cursor-not-allowed'
+              : activeTab === 'admin'
+              ? 'text-amber-400 font-extrabold scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}
+          title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
+        >
+          <div className="relative">
             <Settings className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold">Admin</span>
-          </button>
-        )}
+            {user.role !== 'admin' && (
+              <span className="absolute -top-1 -right-2 bg-slate-900 rounded-full p-0.5 border border-slate-700">
+                <Lock className="w-2.5 h-2.5 text-amber-400" />
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-semibold">Admin</span>
+        </button>
       </nav>
     </>
   );

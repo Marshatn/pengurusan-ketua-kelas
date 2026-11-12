@@ -6,7 +6,9 @@ import { t } from '../translations';
 interface TabAdminProps {
   settings: SystemSettings;
   onUpdateSettings: (settings: SystemSettings) => void;
-  onResetData: () => void;
+  onResetTeachers: () => void;
+  onResetClasses: () => void;
+  onResetVotes: () => void;
   selectedYear: number;
   user: UserSession;
   addToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
@@ -19,7 +21,9 @@ interface TabAdminProps {
 export const TabAdmin: React.FC<TabAdminProps> = ({
   settings,
   onUpdateSettings,
-  onResetData,
+  onResetTeachers,
+  onResetClasses,
+  onResetVotes,
   selectedYear,
   user,
   addToast,
@@ -33,7 +37,6 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
   const [newTeacherIc, setNewTeacherIc] = useState('');
   const [teacherSearch, setTeacherSearch] = useState('');
   const [teacherToDelete, setTeacherToDelete] = useState<TeacherRecord | null>(null);
-  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
   const dict = t[lang].adminTab;
 
@@ -347,60 +350,40 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
 
         <div className="flex flex-wrap gap-4">
           <button
-            onClick={handleExportJson}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#0F172A] hover:bg-slate-800 text-amber-300 font-extrabold text-xs rounded-xl shadow-md transition border border-amber-400/30 cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span>{dict.exportJson}</span>
-          </button>
-
-          <button
-            onClick={() => setShowResetConfirmModal(true)}
+            onClick={() => {
+              if (window.confirm('Adakah anda pasti mahu menetapkan semula senarai guru kepada asal?')) {
+                onResetTeachers();
+              }
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs rounded-xl transition border border-rose-200 cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>{dict.resetData}</span>
+            <span>Reset Guru</span>
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm('Adakah anda pasti mahu menetapkan semula senarai kelas dan pemimpin kepada asal?')) {
+                onResetClasses();
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs rounded-xl transition border border-rose-200 cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Reset Kelas</span>
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm('Adakah anda pasti mahu memadam semua rekod undian?')) {
+                onResetVotes();
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs rounded-xl transition border border-rose-200 cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Reset Undian</span>
           </button>
         </div>
       </div>
-
-      {/* Reset Data Confirmation Modal */}
-      {showResetConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-900">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 mx-auto">
-              <RefreshCw className="w-6 h-6" />
-            </div>
-
-            <h3 className="text-lg font-bold text-center text-slate-900">
-              Tetapkan Semula Semua Data?
-            </h3>
-            <p className="text-xs text-slate-600 text-center mt-2 leading-relaxed">
-              Tindakan ini akan mengembalikan semua maklumat kelas, undian, dan senarai guru kepada tetapan asal.
-            </p>
-
-            <div className="flex items-center gap-3 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowResetConfirmModal(false)}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onResetData();
-                  setShowResetConfirmModal(false);
-                }}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-md transition cursor-pointer"
-              >
-                Ya, Tetapkan Semula
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

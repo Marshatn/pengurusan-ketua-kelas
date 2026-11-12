@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, BarChart3, Sparkles, TrendingUp, AlignLeft, BarChart2, Layers, Medal, Trophy } from 'lucide-react';
+import { Award, BarChart3, Sparkles, TrendingUp, AlignLeft, BarChart2, Layers, Medal, Trophy, Printer } from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -11,7 +11,7 @@ import {
   Cell,
   LabelList,
 } from 'recharts';
-import { VoteRecord, ClassLeaderData, VoteCategory } from '../types';
+import { VoteRecord, ClassLeaderData, VoteCategory, UserSession } from '../types';
 import { TeacherVoterList } from './TeacherVoterList';
 import { t } from '../translations';
 
@@ -21,9 +21,11 @@ interface TabLeaderboardProps {
   selectedYear: number;
   lang: 'ms' | 'zh';
   teachers: string[];
+  user: UserSession;
+  addToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesData, selectedYear, lang, teachers }) => {
+export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesData, selectedYear, lang, teachers, user, addToast }) => {
   const [activeCategory, setActiveCategory] = useState<VoteCategory>('ketua_tahap1');
   const [filterMode, setFilterMode] = useState<'all' | 'top'>('all');
   const [chartOrientation, setChartOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
@@ -170,6 +172,49 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
     return null;
   };
 
+  const generatePrintableHtmlLeaderboard = () => {
+    const rowsHtml = rankedAll
+      .map(
+        (c, idx) => `
+        <tr style="background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1;">${c.name}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1;">${c.classId}</td>
+          <td style="padding: 10px 12px; border: 1px solid #cbd5e1; font-weight: bold;">${c.count}</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: sans-serif; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #000000; color: #ffffff; padding: 10px; text-align: left; }
+    td { padding: 10px; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+<body>
+  <h1>Keputusan Undian: ${currentCategoryObj.label}</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Kedudukan</th>
+        <th>Nama Calon</th>
+        <th>Kelas</th>
+        <th>Jumlah Undi</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+</body>
+</html>`;
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Banner */}
@@ -187,6 +232,26 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
         </div>
 
         <div className="flex items-center gap-4 shrink-0">
+          {user.role === 'admin' && (
+            <button
+              onClick={() => {
+                const win = window.open('', '_blank');
+                if (win) {
+                  win.document.write(generatePrintableHtmlLeaderboard());
+                  win.document.close();
+                  setTimeout(() => {
+                    win.print();
+                    win.close();
+                  }, 500);
+                }
+              }}
+              className="flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition whitespace-nowrap shrink-0 border border-amber-300 cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Cetak Laporan</span>
+            </button>
+          )}
+          
           <div className="bg-slate-800/80 p-4 rounded-2xl border border-amber-400/30 text-center">
             <p className="text-[11px] font-bold text-amber-300 uppercase">{dict.totalVotes}</p>
             <p className="text-2xl font-extrabold text-amber-400 font-mono mt-0.5">{totalCategoryVotes}</p>
