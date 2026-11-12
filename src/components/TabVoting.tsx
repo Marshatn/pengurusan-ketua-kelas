@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Award, CheckCircle2, Lock, Unlock, Sparkles, ThumbsUp, LogOut, Check, ArrowRight } from 'lucide-react';
 import { ClassLeaderData, VoteRecord, UserSession, SystemSettings, VoteCategory, TeacherRecord } from '../types';
 import { TeacherVoterList } from './TeacherVoterList';
+import { sortClassesMerahKuningBiru } from '../data/initialData';
 import { t } from '../translations';
 
 interface TabVotingProps {
@@ -75,14 +76,16 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   const currentCategoryObj = CATEGORIES[currentCategoryIndex] || CATEGORIES[0];
   const activeCategory = currentCategoryObj.id;
 
-  // Tahap 1: Grades 1 - 3, Tahap 2: Grade 6
-  const eligibleClasses = classesData.filter((cls) => {
-    if (currentCategoryObj.isTahap1) {
-      return cls.grade >= 1 && cls.grade <= 3;
-    } else {
-      return cls.grade === 6;
-    }
-  });
+  // Tahap 1: Grades 1 - 3, Tahap 2: Grade 6 - Sorted starting from Merah, Kuning, and Biru
+  const eligibleClasses = sortClassesMerahKuningBiru(
+    classesData.filter((cls) => {
+      if (currentCategoryObj.isTahap1) {
+        return cls.grade >= 1 && cls.grade <= 3;
+      } else {
+        return cls.grade === 6;
+      }
+    })
+  );
 
   const candidates = eligibleClasses
     .map((cls) => ({
@@ -170,7 +173,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
         const firstUnvotedIndex = CATEGORIES.findIndex((cat) => !userVotesInYear.some((v) => v.category === cat.id));
 
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             {CATEGORIES.map((cat, idx) => {
               const isVoted = userVotesInYear.some((v) => v.category === cat.id);
               const isActive = activeCategory === cat.id;
@@ -194,12 +197,12 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                     }
                     setCurrentCategoryIndex(idx);
                   }}
-                  className={`p-4 rounded-2xl text-left transition flex flex-col justify-between border relative cursor-pointer ${cardStyle}`}
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left transition flex flex-col justify-between border relative cursor-pointer min-h-[76px] ${cardStyle}`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
+                  <div className="w-full">
+                    <div className="flex items-center justify-between mb-1.5 gap-1">
                       <span
-                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+                        className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded truncate ${
                           isVoted || isMissed
                             ? 'bg-black/30 text-white'
                             : isActive
@@ -207,20 +210,20 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                         }`}
                       >
-                        {cat.isTahap1 ? 'TAHAP I' : 'TAHAP II (Tahun 6)'}
+                        {cat.isTahap1 ? 'TAHAP 1' : 'TAHAP 2'}
                       </span>
                       {isVoted ? (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-white">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
-                          <span>{dict.votedBtn}</span>
+                        <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-white shrink-0">
+                          <CheckCircle2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-200" />
+                          <span className="hidden sm:inline">{dict.votedBtn}</span>
                         </span>
                       ) : isMissed ? (
-                        <span className="flex items-center gap-1 text-[11px] font-extrabold text-white">
+                        <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-white shrink-0">
                           <span>Terlepas!</span>
                         </span>
                       ) : null}
                     </div>
-                    <h4 className="text-xs font-black leading-tight">{cat.label}</h4>
+                    <h4 className="text-[11px] sm:text-xs font-black leading-snug line-clamp-2">{cat.label}</h4>
                   </div>
                 </button>
               );
@@ -329,7 +332,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                 <button
                   type="button"
                   disabled={true}
-                  className="w-full py-3 px-4 rounded-xl font-black text-xs flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-md cursor-not-allowed border border-emerald-400/50 opacity-95"
+                  className="w-full py-3.5 px-4 min-h-[48px] rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-md cursor-not-allowed border border-emerald-400/50 opacity-95"
                   title="Undian anda telah disahkan dan tidak boleh dipinda"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-200" />
@@ -340,7 +343,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                 <button
                   type="button"
                   disabled={true}
-                  className="w-full py-3 px-4 rounded-xl font-black text-xs flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700"
+                  className="w-full py-3.5 px-4 min-h-[48px] rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700"
                   title="Undian kategori ini telah selesai dan tidak boleh dipinda"
                 >
                   <Lock className="w-3.5 h-3.5 text-slate-400" />
@@ -358,7 +361,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                       category: activeCategory,
                     })
                   }
-                  className={`w-full py-3 px-4 rounded-xl font-black text-xs transition flex items-center justify-center gap-2 ${
+                  className={`w-full py-3.5 px-4 min-h-[48px] rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 active:scale-98 ${
                     !settings.votingOpen && user.role !== 'admin'
                       ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                       : 'bg-[#0F172A] hover:bg-slate-800 text-amber-400 shadow-lg border border-amber-400/40 cursor-pointer'
@@ -375,22 +378,22 @@ export const TabVoting: React.FC<TabVotingProps> = ({
 
       {/* Completion Banner if all 4 categories voted */}
       {userVotesInYear.length === 4 && (
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-7 h-7 text-emerald-200" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold">Tahniah! Anda telah melengkapkan undian bagi semua 4 kategori.</h3>
+              <h3 className="text-sm sm:text-base font-extrabold">Tahniah! Anda telah melengkapkan undian bagi semua 4 kategori.</h3>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="w-full sm:w-auto flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onLogout}
-              className="px-4 py-2.5 rounded-xl bg-white text-slate-950 font-black text-xs hover:bg-emerald-50 transition shadow-lg cursor-pointer flex items-center gap-1.5"
+              className="w-full sm:w-auto px-5 py-3 min-h-[48px] rounded-xl bg-white text-slate-950 font-black text-xs sm:text-sm hover:bg-emerald-50 transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-98"
             >
-              <LogOut className="w-3.5 h-3.5 text-emerald-700" />
+              <LogOut className="w-4 h-4 text-emerald-700" />
               <span>Selesai & Log Keluar</span>
             </button>
           </div>
@@ -407,16 +410,16 @@ export const TabVoting: React.FC<TabVotingProps> = ({
 
       {/* Confirmation Modal for Initial Vote - Clearly states no amendment can be made */}
       {confirmModalCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-3 sm:p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-md max-h-[92vh] overflow-y-auto my-auto rounded-3xl bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 flex items-center justify-center mb-4 mx-auto">
               <Award className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white text-center">
               {dict.confirmTitle}
             </h3>
             
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-2">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center mt-2">
               {dict.confirmDesc} <strong>{confirmModalCandidate.name}</strong> ({confirmModalCandidate.classId})?
             </p>
 
@@ -428,17 +431,17 @@ export const TabVoting: React.FC<TabVotingProps> = ({
               <button
                 type="button"
                 onClick={() => setConfirmModalCandidate(null)}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 transition cursor-pointer"
+                className="flex-1 py-3 px-4 min-h-[48px] rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold hover:bg-slate-200 transition cursor-pointer active:scale-98"
               >
                 {dict.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmVote}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-[#EAB308] hover:bg-amber-500 text-slate-950 text-xs font-extrabold shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 px-4 min-h-[48px] rounded-xl bg-[#EAB308] hover:bg-amber-500 text-slate-950 text-xs sm:text-sm font-extrabold shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
               >
                 <span>Sahkan Undian</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

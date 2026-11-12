@@ -96,21 +96,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto select-none">
       <NeonBackground variant="login" />
 
-      <div className="absolute top-5 right-5 z-20">
+      <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20">
         <button
           type="button"
           onClick={() => setLang(lang === 'ms' ? 'zh' : 'ms')}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-white/90 hover:bg-white border border-sky-300 rounded-xl transition shadow-lg backdrop-blur-md cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 text-xs font-bold text-slate-900 bg-white/90 hover:bg-white border border-sky-300 rounded-xl transition shadow-lg backdrop-blur-md cursor-pointer"
         >
           <Globe className="w-3.5 h-3.5 text-amber-500" />
           <span>{lang === 'ms' ? '中文 (ZH)' : 'BM'}</span>
         </button>
       </div>
 
-      <div className="relative z-10 w-full max-w-lg rounded-3xl bg-white/95 backdrop-blur-xl border border-sky-200/90 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.25)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-900">
+      <div className="relative z-10 w-full max-w-lg my-auto max-h-[92vh] overflow-y-auto rounded-3xl bg-white/95 backdrop-blur-xl border border-sky-200/90 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.25)] animate-in fade-in zoom-in-95 duration-200 text-slate-900">
         <div className="bg-gradient-to-r from-[#0F172A] via-blue-900 to-[#0F172A] p-6 text-white text-center relative border-b border-amber-400/30">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-3 shadow-lg border-2 border-amber-300 overflow-hidden p-1">
             <img
@@ -211,7 +211,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
 
           <button
             type="submit"
-            className="w-full py-3.5 px-4 rounded-xl bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer border border-amber-300"
+            className="w-full py-3.5 px-4 min-h-[48px] rounded-xl bg-[#EAB308] hover:bg-amber-400 active:scale-98 text-slate-950 font-black text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer border border-amber-300"
           >
             <Lock className="w-4 h-4" />
             <span>{dict.submit}</span>

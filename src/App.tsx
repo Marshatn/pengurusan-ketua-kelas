@@ -9,7 +9,7 @@ import { TabAdmin } from './components/TabAdmin';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
-import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
+import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS, sortClassesMerahKuningBiru } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord, VoteCategory } from './types';
 import { db } from './firebase';
 import { collection, doc, onSnapshot, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
@@ -26,7 +26,8 @@ export default function App() {
   });
 
   const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [activeTab, setActiveTab] = useState<string>('classes');
+  // Default to voting tab so teachers immediately see the voting screen upon login
+  const [activeTab, setActiveTab] = useState<string>('voting');
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
 
   // Teachers master list with Name and IC support
@@ -159,7 +160,7 @@ export default function App() {
         });
         if (Object.keys(byYear).length > 0) {
           for (const yr of Object.keys(byYear)) {
-            byYear[Number(yr)].sort((a, b) => a.id.localeCompare(b.id));
+            byYear[Number(yr)] = sortClassesMerahKuningBiru(byYear[Number(yr)]);
           }
           setClassesByYear(byYear);
         }
@@ -238,7 +239,7 @@ export default function App() {
     }
   }, [user]);
 
-  const currentClasses = classesByYear[selectedYear] || INITIAL_CLASSES_2026.map(c => ({ ...c }));
+  const currentClasses = sortClassesMerahKuningBiru(classesByYear[selectedYear] || INITIAL_CLASSES_2026.map(c => ({ ...c })));
 
   const handleUpdateClass = (updated: ClassLeaderData) => {
     setClassesByYear((prev) => {
@@ -406,11 +407,21 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-24 md:pb-16">
+    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-36 sm:pb-28 md:pb-16">
       {/* Slow Moving Automatic Neon Background for Main App Screen */}
       <NeonBackground variant="app" />
 
-      <LoginModal isOpen={!user} onLogin={(sess) => setUser(sess)} lang={lang} setLang={setLang} teachers={teachers} />
+      <LoginModal
+        isOpen={!user}
+        onLogin={(sess) => {
+          setUser(sess);
+          setActiveTab('voting');
+          setCurrentCategoryIndex(0);
+        }}
+        lang={lang}
+        setLang={setLang}
+        teachers={teachers}
+      />
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <OfflineIndicator />
@@ -426,6 +437,8 @@ export default function App() {
             onLogout={() => {
               localStorage.removeItem('sistem_pemimpin_session');
               setUser(null);
+              setActiveTab('voting');
+              setCurrentCategoryIndex(0);
             }}
             lang={lang}
             setLang={setLang}

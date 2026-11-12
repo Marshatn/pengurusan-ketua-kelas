@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { School, Edit3, Check, Search, Printer, Download, FileSpreadsheet, X, CheckCircle2 } from 'lucide-react';
 import { ClassLeaderData, UserSession } from '../types';
+import { sortClassesMerahKuningBiru } from '../data/initialData';
 import { t } from '../translations';
 
 interface TabClassesProps {
@@ -44,14 +45,16 @@ export const TabClasses: React.FC<TabClassesProps> = ({
     addToast(lang === 'ms' ? `Maklumat ${editFormData.name} berjaya dikemaskini!` : `班级 ${editFormData.name} 信息已更新！`, 'success');
   };
 
-  const filteredClasses = classesData.filter((c) => {
-    return (
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.headPrefect.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.assistantPrefect.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  const filteredClasses = sortClassesMerahKuningBiru(
+    classesData.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.headPrefect.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.assistantPrefect.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    })
+  );
 
   // Generate clean standalone printable HTML document
   const generatePrintableHtml = () => {

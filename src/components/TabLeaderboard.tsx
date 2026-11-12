@@ -122,7 +122,22 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
   if (sortBy === 'votes') {
     chartList.sort((a, b) => b.count - a.count || a.classId.localeCompare(b.classId));
   } else {
-    chartList.sort((a, b) => a.classId.localeCompare(b.classId));
+    const getColorRank = (id: string): number => {
+      const last = id.slice(-1).toUpperCase();
+      if (last === 'M') return 1;
+      if (last === 'K') return 2;
+      if (last === 'B') return 3;
+      return 4;
+    };
+    chartList.sort((a, b) => {
+      const gA = a.grade || parseInt(a.classId, 10) || 0;
+      const gB = b.grade || parseInt(b.classId, 10) || 0;
+      if (gA !== gB) return gA - gB;
+      const cA = getColorRank(a.classId);
+      const cB = getColorRank(b.classId);
+      if (cA !== cB) return cA - cB;
+      return a.classId.localeCompare(b.classId);
+    });
   }
 
   if (filterMode === 'top' && chartList.length > 8) {
@@ -264,7 +279,7 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
       </div>
 
       {/* 4 Category Selection Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat.id;
 

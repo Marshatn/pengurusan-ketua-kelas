@@ -427,3 +427,33 @@ export const INITIAL_SETTINGS: SystemSettings = {
   announcement: 'Selamat datang ke Sistem Pengurusan Pemimpin Murid Sesi 2026. Sila semak senarai kelas 1M hingga 6B (Merah, Kuning, Biru).',
   schoolName: 'SJK (C) CHUNG HWA KOTA BELUD',
 };
+
+// Sort helper: Grade 1 to 6, with color order Merah (M) -> Kuning (K) -> Biru (B)
+export const sortClassesMerahKuningBiru = (classes: ClassLeaderData[]): ClassLeaderData[] => {
+  const getColorRank = (cls: ClassLeaderData): number => {
+    const idLast = cls.id.slice(-1).toUpperCase();
+    if (idLast === 'M') return 1;
+    if (idLast === 'K') return 2;
+    if (idLast === 'B') return 3;
+
+    const nameUpper = (cls.name || '').toUpperCase();
+    if (nameUpper.includes('MERAH')) return 1;
+    if (nameUpper.includes('KUNING')) return 2;
+    if (nameUpper.includes('BIRU')) return 3;
+    return 4;
+  };
+
+  return [...classes].sort((a, b) => {
+    const gradeA = Number(a.grade) || parseInt(a.id, 10) || 0;
+    const gradeB = Number(b.grade) || parseInt(b.id, 10) || 0;
+    if (gradeA !== gradeB) {
+      return gradeA - gradeB;
+    }
+    const colorA = getColorRank(a);
+    const colorB = getColorRank(b);
+    if (colorA !== colorB) {
+      return colorA - colorB;
+    }
+    return a.id.localeCompare(b.id);
+  });
+};

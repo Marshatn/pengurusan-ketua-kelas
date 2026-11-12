@@ -36,7 +36,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
             {/* Zone 1: Brand Wordmark with Deep Navy & Golden Yellow */}
-            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <div
+              onClick={() => setActiveTab('voting')}
+              className="flex items-center gap-2.5 sm:gap-3 shrink-0 cursor-pointer"
+              title="Pergi ke Pengundian Pemimpin Murid"
+            >
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-amber-500/20 border-2 border-amber-300 overflow-hidden shrink-0">
                 <img
                   src="/school_logo.jpg"
@@ -223,91 +227,71 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar (Super easy to view and effective on smartphones) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F172A]/95 backdrop-blur-xl border-t border-amber-400/30 px-2 py-1.5 flex justify-around items-center shadow-2xl safe-area-pb">
+      {/* Mobile Bottom Navigation Bar (Optimized for smartphones and touch devices) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A]/98 backdrop-blur-xl border-t border-amber-400/40 px-2 py-1.5 flex justify-around items-center shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.5)] safe-area-pb">
         <button
           onClick={() => setActiveTab('classes')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
+          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
             activeTab === 'classes'
-              ? 'text-amber-400 font-extrabold scale-105'
+              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <Users className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Kelas' : '班级'}</span>
+          <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Kelas' : '班级'}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('voting')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
+          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
             activeTab === 'voting'
-              ? 'text-amber-400 font-extrabold scale-105'
+              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <Award className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Undian' : '投票'}</span>
+          <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Undian' : '投票'}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('sop')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${
+          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
             activeTab === 'sop'
-              ? 'text-amber-400 font-extrabold scale-105'
+              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <BookOpen className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] font-semibold">SOP</span>
+          <span className="text-[11px] font-bold tracking-tight">SOP</span>
         </button>
 
-        <button
-          onClick={() => {
-            if (user.role === 'admin') setActiveTab('leaderboard');
-          }}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition relative ${
-            user.role !== 'admin'
-              ? 'text-slate-600 opacity-60 cursor-not-allowed'
-              : activeTab === 'leaderboard'
-              ? 'text-amber-400 font-extrabold scale-105'
-              : 'text-slate-400 hover:text-white'
-          }`}
-          title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
-        >
-          <div className="relative">
-            <BarChart3 className="w-5 h-5 mb-0.5" />
-            {user.role !== 'admin' && (
-              <span className="absolute -top-1 -right-2 bg-slate-900 rounded-full p-0.5 border border-slate-700">
-                <Lock className="w-2.5 h-2.5 text-amber-400" />
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-semibold">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
-        </button>
+        {user.role === 'admin' && (
+          <>
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+                activeTab === 'leaderboard'
+                  ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <BarChart3 className="w-5 h-5 mb-0.5" />
+              <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
+            </button>
 
-        <button
-          onClick={() => {
-            if (user.role === 'admin') setActiveTab('admin');
-          }}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition relative ${
-            user.role !== 'admin'
-              ? 'text-slate-600 opacity-60 cursor-not-allowed'
-              : activeTab === 'admin'
-              ? 'text-amber-400 font-extrabold scale-105'
-              : 'text-slate-400 hover:text-white'
-          }`}
-          title={user.role !== 'admin' ? 'Akses Terhad Pentadbir (Locked)' : ''}
-        >
-          <div className="relative">
-            <Settings className="w-5 h-5 mb-0.5" />
-            {user.role !== 'admin' && (
-              <span className="absolute -top-1 -right-2 bg-slate-900 rounded-full p-0.5 border border-slate-700">
-                <Lock className="w-2.5 h-2.5 text-amber-400" />
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-semibold">Admin</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('admin')}
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+                activeTab === 'admin'
+                  ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Settings className="w-5 h-5 mb-0.5" />
+              <span className="text-[11px] font-bold tracking-tight">Admin</span>
+            </button>
+          </>
+        )}
       </nav>
     </>
   );
