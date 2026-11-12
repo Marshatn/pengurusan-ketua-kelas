@@ -58,9 +58,13 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
+  } catch (error: any) {
+    // If error is 'not-found', connection to Firestore is successful (document just doesn't exist yet)
+    if (error?.code === 'not-found' || error?.message?.includes('No document to read')) {
+      return;
+    }
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
+      console.warn("Firebase client is offline. Check your network or configuration.");
     }
   }
 }
