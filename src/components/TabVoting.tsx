@@ -27,7 +27,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   lang,
   teachers,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<VoteCategory>('ketua_tahap1');
+  const [categoryIndex, setCategoryIndex] = useState<number>(0);
   const [confirmModalCandidate, setConfirmModalCandidate] = useState<{
     name: string;
     classId: string;
@@ -67,7 +67,8 @@ export const TabVoting: React.FC<TabVotingProps> = ({
     },
   ];
 
-  const currentCategoryObj = CATEGORIES.find((c) => c.id === activeCategory) || CATEGORIES[0];
+  const currentCategoryObj = CATEGORIES[categoryIndex] || CATEGORIES[0];
+  const activeCategory = currentCategoryObj.id;
 
   // Tahap 1: Grades 1 - 3, Tahap 2: Grade 6
   const eligibleClasses = classesData.filter((cls) => {
@@ -113,6 +114,14 @@ export const TabVoting: React.FC<TabVotingProps> = ({
       candidateName: candidate.name,
       classId: candidate.classId,
     });
+
+    // Auto-advance categoryIndex state to the next category until the end
+    if (categoryIndex < CATEGORIES.length - 1) {
+      setCategoryIndex((prev) => prev + 1);
+      addToast(`Undian berjaya! Seterusnya: ${CATEGORIES[categoryIndex + 1].label}`, 'success');
+    } else {
+      addToast('Tahniah! Anda telah selesai mengundi kesemua kategori.', 'success');
+    }
   };
 
   return (
@@ -141,14 +150,14 @@ export const TabVoting: React.FC<TabVotingProps> = ({
 
       {/* 4 Category Selection Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {CATEGORIES.map((cat) => {
+        {CATEGORIES.map((cat, idx) => {
           const isVoted = userVotesInYear.some((v) => v.category === cat.id);
           const isActive = activeCategory === cat.id;
 
           return (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() => setCategoryIndex(idx)}
               className={`p-4 rounded-2xl text-left transition flex flex-col justify-between border relative ${
                 isActive
                   ? 'bg-[#EAB308] text-[#0F172A] border-amber-500 shadow-lg shadow-amber-500/20 ring-2 ring-amber-400/50'
