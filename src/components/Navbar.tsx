@@ -32,16 +32,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#0F172A]/95 backdrop-blur-md border-b border-amber-400/30 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
+      <header className="sticky top-0 z-40 bg-[#0F172A]/95 backdrop-blur-md border-b border-amber-400/30 shadow-md w-full max-w-full overflow-hidden">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-20 gap-2 sm:gap-3">
             {/* Zone 1: Brand Wordmark with Deep Navy & Golden Yellow */}
             <div
               onClick={() => setActiveTab('voting')}
-              className="flex items-center gap-2.5 sm:gap-3 shrink-0 cursor-pointer"
+              className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 cursor-pointer"
               title="Pergi ke Pengundian Pemimpin Murid"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-amber-500/20 border-2 border-amber-300 overflow-hidden shrink-0">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-amber-500/20 border-2 border-amber-300 overflow-hidden shrink-0">
                 <img
                   src="/school_logo.jpg"
                   alt="Logo SJK (C) Chung Hwa Kota Belud"
@@ -49,11 +49,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div>
-                <h1 className="text-xs sm:text-base font-extrabold text-white tracking-tight leading-tight line-clamp-1">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[11px] sm:text-base font-extrabold text-white tracking-tight leading-tight truncate">
                   {dict.appName}
                 </h1>
-                <p className="text-[10px] sm:text-[11px] font-medium text-amber-300 line-clamp-1">
+                <p className="text-[9px] sm:text-[11px] font-medium text-amber-300 truncate">
                   {dict.subTitle}
                 </p>
               </div>
@@ -94,60 +94,43 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Right Actions: User Name Badge + Language Switcher + Logout */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* User Name Badge */}
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              {/* User Name Badge (Desktop only) */}
               <div className="hidden md:flex items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-amber-400/30 text-xs text-amber-300 font-bold shadow-inner">
                 <User className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <span className="line-clamp-1 max-w-[180px]">{user.name}</span>
               </div>
 
-              {/* Language Toggle */}
+              {/* Language Toggle: Ultra compact so can view all in 1 page */}
               <button
                 onClick={() => setLang(lang === 'ms' ? 'zh' : 'ms')}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 rounded-xl transition shadow-xs cursor-pointer"
+                className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 rounded-lg sm:rounded-xl transition shadow-xs cursor-pointer shrink-0"
                 title="Tukar Bahasa / 切换语言"
               >
-                <Globe className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">{lang === 'ms' ? '中文' : 'BM'}</span>
-                <span className="sm:hidden">{lang === 'ms' ? 'ZH' : 'BM'}</span>
+                <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
+                <span>{lang === 'ms' ? '中文' : 'BM'}</span>
               </button>
 
               <button
                 onClick={onLogout}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-rose-300 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/60 rounded-xl transition cursor-pointer"
+                className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-rose-300 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/60 rounded-lg sm:rounded-xl transition cursor-pointer shrink-0"
                 title={dict.logout}
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span className="hidden md:inline">{dict.logout}</span>
               </button>
             </div>
           </div>
 
-          {/* Mobile Year Switcher Row */}
-          <div className="flex lg:hidden items-center justify-between py-2 border-t border-slate-800 text-xs">
-            <span className="font-semibold text-amber-300">{dict.session} {selectedYear}</span>
-            <div className="flex items-center gap-1">
-              {YEARS.map((y) => {
-                const isCurrentYear = y === currentYear;
-                return (
-                  <button
-                    key={y}
-                    disabled={!isCurrentYear}
-                    onClick={() => {
-                      if (isCurrentYear) setSelectedYear(y);
-                    }}
-                    className={`px-2 py-0.5 text-xs font-bold rounded-md flex items-center gap-0.5 ${
-                      selectedYear === y
-                        ? 'bg-amber-400 text-slate-950 font-black'
-                        : 'bg-slate-900 text-slate-600 opacity-40 cursor-not-allowed'
-                    }`}
-                  >
-                    <span>{y}</span>
-                    {!isCurrentYear && <Lock className="w-2 h-2 opacity-50" />}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Mobile Year Switcher Row - Compact single row without overflowing buttons */}
+          <div className="flex lg:hidden items-center justify-between py-1 border-t border-slate-800 text-[11px] gap-2">
+            <span className="font-bold text-amber-300 truncate flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
+              <span>{dict.session} {selectedYear}</span>
+            </span>
+            <span className="px-2 py-0.5 text-[10px] font-black rounded-md bg-[#EAB308] text-slate-950 font-mono shadow-xs shrink-0">
+              Sesi {selectedYear} Aktif
+            </span>
           </div>
 
           {/* Desktop Tab Navigation (Hidden on Mobile) */}
@@ -228,67 +211,68 @@ export const Navbar: React.FC<NavbarProps> = ({
       </header>
 
       {/* Mobile Bottom Navigation Bar (Optimized for smartphones and touch devices) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A]/98 backdrop-blur-xl border-t border-amber-400/40 px-2 py-1.5 flex justify-around items-center shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.5)] safe-area-pb">
+      {/* Mobile Bottom Navigation Bar (Guaranteed visible immediately upon login, fits 100% within mobile viewport) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A]/98 backdrop-blur-xl border-t border-amber-400/40 px-1 py-1 flex items-center justify-around shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.5)] safe-area-pb w-full max-w-full overflow-hidden transform-gpu">
         <button
           onClick={() => setActiveTab('classes')}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition cursor-pointer min-h-[46px] ${
             activeTab === 'classes'
-              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
+              ? 'text-amber-400 font-black bg-slate-800/80 shadow-xs'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Users className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Kelas' : '班级'}</span>
+          <Users className="w-4 h-4 mb-0.5 shrink-0" />
+          <span className="text-[10px] font-bold tracking-tight truncate max-w-full">{lang === 'ms' ? 'Kelas' : '班级'}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('voting')}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition cursor-pointer min-h-[46px] ${
             activeTab === 'voting'
-              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
+              ? 'text-amber-400 font-black bg-slate-800/80 shadow-xs'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Award className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Undian' : '投票'}</span>
+          <Award className="w-4 h-4 mb-0.5 shrink-0" />
+          <span className="text-[10px] font-bold tracking-tight truncate max-w-full">{lang === 'ms' ? 'Undian' : '投票'}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('sop')}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition cursor-pointer min-h-[46px] ${
             activeTab === 'sop'
-              ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
+              ? 'text-amber-400 font-black bg-slate-800/80 shadow-xs'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <BookOpen className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px] font-bold tracking-tight">SOP</span>
+          <BookOpen className="w-4 h-4 mb-0.5 shrink-0" />
+          <span className="text-[10px] font-bold tracking-tight truncate max-w-full">SOP</span>
         </button>
 
         {user.role === 'admin' && (
           <>
             <button
               onClick={() => setActiveTab('leaderboard')}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition cursor-pointer min-h-[46px] ${
                 activeTab === 'leaderboard'
-                  ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-amber-400 font-black bg-slate-800/80 shadow-xs'
+                : 'text-slate-400 hover:text-white'
               }`}
             >
-              <BarChart3 className="w-5 h-5 mb-0.5" />
-              <span className="text-[11px] font-bold tracking-tight">{lang === 'ms' ? 'Keputusan' : '结果'}</span>
+              <BarChart3 className="w-4 h-4 mb-0.5 shrink-0" />
+              <span className="text-[10px] font-bold tracking-tight truncate max-w-full">{lang === 'ms' ? 'Hasil' : '结果'}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('admin')}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition cursor-pointer min-h-[48px] ${
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition cursor-pointer min-h-[46px] ${
                 activeTab === 'admin'
-                  ? 'text-amber-400 font-extrabold bg-slate-800/80 shadow-xs scale-102'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-amber-400 font-black bg-slate-800/80 shadow-xs'
+                : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Settings className="w-5 h-5 mb-0.5" />
-              <span className="text-[11px] font-bold tracking-tight">Admin</span>
+              <Settings className="w-4 h-4 mb-0.5 shrink-0" />
+              <span className="text-[10px] font-bold tracking-tight truncate max-w-full">Admin</span>
             </button>
           </>
         )}

@@ -407,7 +407,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-36 sm:pb-28 md:pb-16">
+    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-32 sm:pb-28 md:pb-16 w-full max-w-full overflow-x-hidden">
       {/* Slow Moving Automatic Neon Background for Main App Screen */}
       <NeonBackground variant="app" />
 
@@ -445,13 +445,13 @@ export default function App() {
           />
 
           {settings.announcement && (
-            <div className="bg-[#EAB308] text-slate-950 py-2.5 px-4 text-center text-xs font-extrabold shadow-inner flex items-center justify-center gap-2 border-b border-amber-500">
-              <span className="px-2 py-0.5 rounded-md bg-[#0F172A] text-amber-300 uppercase text-[10px] tracking-wider font-mono">PENGUMUMAN / 公告</span>
-              <span>{settings.announcement}</span>
+            <div className="bg-[#EAB308] text-slate-950 py-2 px-3 text-center text-xs font-extrabold shadow-inner flex items-center justify-center gap-2 border-b border-amber-500 w-full overflow-hidden">
+              <span className="px-1.5 py-0.5 rounded-md bg-[#0F172A] text-amber-300 uppercase text-[9px] tracking-wider font-mono shrink-0">PENGUMUMAN</span>
+              <span className="truncate">{settings.announcement}</span>
             </div>
           )}
 
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <main className="max-w-7xl mx-auto px-1.5 sm:px-4 md:px-6 lg:px-8 pt-2.5 sm:pt-6 md:pt-8 w-full max-w-full overflow-x-hidden">
             {activeTab === 'classes' && (
               <TabClasses
                 classesData={currentClasses}

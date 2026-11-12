@@ -117,29 +117,29 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 dark:bg-slate-900/90 rounded-3xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden">
+    <div className="bg-slate-900/90 dark:bg-slate-900/90 rounded-2xl sm:rounded-3xl border border-cyan-500/30 shadow-2xl p-3.5 sm:p-8 backdrop-blur-md relative overflow-hidden w-full max-w-full">
       {/* Subtle Neon Decorative Header Glow */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header & Confidentiality Notice */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-slate-800">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
-              {lang === 'ms' ? 'Status Kehadiran Mengundi' : '教师投票出席名单'}
+          <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1.5">
+              <UserCheck className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400" />
+              {lang === 'ms' ? 'Status Kehadiran' : '教师投票名单'}
             </span>
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
               <Lock className="w-3 h-3 text-emerald-400" />
-              {lang === 'ms' ? 'Undian Rahsia (Pilihan Murid Dirahsiakan)' : '无记名保密投票'}
+              {lang === 'ms' ? 'Sulit & Rahsia' : '无记名保密'}
             </span>
           </div>
-          <h3 className="text-xl font-extrabold text-white tracking-tight">
+          <h3 className="text-base sm:text-xl font-extrabold text-white tracking-tight">
             {lang === 'ms'
-              ? `Senarai Guru Yang Telah Mengundi (Sesi ${selectedYear})`
+              ? `Senarai Guru Mengundi (Sesi ${selectedYear})`
               : `已完成投票教师名单（${selectedYear}学年）`}
           </h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-1 max-w-2xl">
             {lang === 'ms'
               ? 'Status rekod guru yang telah menunaikan tanggungjawab mengundi. Mengikut dasar kerahsiaan undian, nama murid yang dipilih adalah sulit dan tidak dipaparkan.'
               : '记录已履行投票职责的教师名单。根据投票保密原则，所投学生姓名完全保密并不予显示。'}
@@ -147,7 +147,7 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
         </div>
 
         {/* Turnout Progress Card */}
-        <div className="bg-[#0F172A] p-4 rounded-2xl border border-slate-800 shrink-0 w-full md:w-64">
+        <div className="bg-[#0F172A] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800 shrink-0 w-full md:w-64">
           <div className="flex justify-between items-center text-xs mb-1.5">
             <span className="text-slate-400 font-medium">
               {lang === 'ms' ? 'Peratus Keluar Mengundi:' : '投票出席率：'}
@@ -178,14 +178,14 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shrink-0 ${
               filter === 'all'
                 ? 'bg-cyan-500 text-slate-950 font-extrabold shadow-md shadow-cyan-500/20'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>{lang === 'ms' ? 'Semua Guru' : '全部教师'}</span>
+            <span>{lang === 'ms' ? 'Semua' : '全部'}</span>
             <span className="px-1.5 py-0.2 rounded-md bg-slate-900/60 text-[10px]">
               {totalTeachers}
             </span>
@@ -193,14 +193,14 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
 
           <button
             onClick={() => setFilter('voted')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shrink-0 ${
               filter === 'voted'
                 ? 'bg-emerald-500 text-slate-950 font-extrabold shadow-md shadow-emerald-500/20'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{lang === 'ms' ? 'Telah Mengundi' : '已投票'}</span>
+            <span>{lang === 'ms' ? 'Sudah' : '已投'}</span>
             <span className="px-1.5 py-0.2 rounded-md bg-emerald-950/80 text-emerald-200 text-[10px]">
               {votedTeachersCount}
             </span>
@@ -208,14 +208,14 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
 
           <button
             onClick={() => setFilter('pending')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shrink-0 ${
               filter === 'pending'
                 ? 'bg-amber-400 text-slate-950 font-extrabold shadow-md shadow-amber-500/20'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>{lang === 'ms' ? 'Belum Mengundi' : '未投票'}</span>
+            <span>{lang === 'ms' ? 'Belum' : '未投'}</span>
             <span className="px-1.5 py-0.2 rounded-md bg-amber-950/80 text-amber-200 text-[10px]">
               {pendingTeachersCount}
             </span>

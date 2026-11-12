@@ -128,41 +128,41 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Header Banner - Clean and professional, removed debug/extra buttons */}
-      <div className="bg-[#0F172A] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden border border-amber-400/30">
+      <div className="bg-[#0F172A] p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl text-white shadow-xl relative overflow-hidden border border-amber-400/30">
         <div className="absolute right-4 -bottom-6 opacity-10 pointer-events-none text-amber-400">
           <Award className="w-56 h-56" />
         </div>
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+        <div className="relative z-10 space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-3">
+            <span className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
               settings.votingOpen ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
             }`}>
-              {settings.votingOpen ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+              {settings.votingOpen ? <Unlock className="w-3 sm:w-3.5 h-3 sm:h-3.5" /> : <Lock className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
               {settings.votingOpen ? `${dict.votingOpen} (${selectedYear})` : dict.votingClosed}
             </span>
 
-            <span className="text-xs text-amber-300 font-semibold">
+            <span className="text-[11px] sm:text-xs text-amber-300 font-semibold">
               Status Anda: <strong className="text-white font-mono">{userVotesInYear.length} / 4</strong> Kategori Selesai
             </span>
           </div>
 
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-white">{dict.bannerTitle}</h2>
-            <p className="text-sm text-amber-200/90 mt-1 max-w-2xl">
+            <h2 className="text-lg sm:text-2xl font-extrabold tracking-tight text-white">{dict.bannerTitle}</h2>
+            <p className="text-xs sm:text-sm text-amber-200/90 mt-1 max-w-2xl">
               {dict.bannerDesc}
             </p>
           </div>
 
           {/* Teacher Identity & Confidentiality Notice */}
-          <div className="flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-slate-800/80 text-xs text-slate-300">
+          <div className="flex items-center justify-between flex-wrap gap-1.5 pt-2.5 sm:pt-3 border-t border-slate-800/80 text-[11px] sm:text-xs text-slate-300">
             <div>
               Guru Mengundi: <strong className="text-white font-bold">{user.name}</strong>
-              <span className="font-mono text-amber-400 ml-1.5 text-[11px]">({user.username})</span>
+              <span className="font-mono text-amber-400 ml-1.5 text-[10px] sm:text-[11px]">({user.username})</span>
             </div>
-            <div className="text-slate-400 text-[11px]">
-              Setiap undian adalah <strong className="text-amber-400">MUKTAMAD</strong> dan tidak boleh dipinda setelah dihantar.
+            <div className="text-slate-400 text-[10px] sm:text-[11px]">
+              Setiap undian adalah <strong className="text-amber-400">MUKTAMAD</strong>.
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
         const firstUnvotedIndex = CATEGORIES.findIndex((cat) => !userVotesInYear.some((v) => v.category === cat.id));
 
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-3">
             {CATEGORIES.map((cat, idx) => {
               const isVoted = userVotesInYear.some((v) => v.category === cat.id);
               const isActive = activeCategory === cat.id;
@@ -197,12 +197,12 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                     }
                     setCurrentCategoryIndex(idx);
                   }}
-                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left transition flex flex-col justify-between border relative cursor-pointer min-h-[76px] ${cardStyle}`}
+                  className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl text-left transition flex flex-col justify-between border relative cursor-pointer min-h-[70px] sm:min-h-[76px] ${cardStyle}`}
                 >
                   <div className="w-full">
-                    <div className="flex items-center justify-between mb-1.5 gap-1">
+                    <div className="flex items-center justify-between mb-1 gap-1">
                       <span
-                        className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded truncate ${
+                        className={`text-[8.5px] sm:text-[10px] font-black uppercase tracking-wider px-1 sm:px-2 py-0.5 rounded truncate ${
                           isVoted || isMissed
                             ? 'bg-black/30 text-white'
                             : isActive
@@ -213,17 +213,17 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                         {cat.isTahap1 ? 'TAHAP 1' : 'TAHAP 2'}
                       </span>
                       {isVoted ? (
-                        <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-white shrink-0">
+                        <span className="flex items-center gap-1 text-[9px] sm:text-[11px] font-bold text-white shrink-0">
                           <CheckCircle2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-200" />
                           <span className="hidden sm:inline">{dict.votedBtn}</span>
                         </span>
                       ) : isMissed ? (
-                        <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-white shrink-0">
+                        <span className="flex items-center gap-1 text-[9px] sm:text-[11px] font-extrabold text-white shrink-0">
                           <span>Terlepas!</span>
                         </span>
                       ) : null}
                     </div>
-                    <h4 className="text-[11px] sm:text-xs font-black leading-snug line-clamp-2">{cat.label}</h4>
+                    <h4 className="text-[10.5px] sm:text-xs font-black leading-snug line-clamp-2">{cat.label}</h4>
                   </div>
                 </button>
               );
@@ -233,45 +233,45 @@ export const TabVoting: React.FC<TabVotingProps> = ({
       })()}
 
       {/* Active Category Header Card - Locked once voted, no amendment can be made */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#EAB308] text-slate-950 flex items-center justify-center shrink-0 shadow-sm">
-            {currentCategoryObj.isKetua ? <Award className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+      <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-amber-500/10 border border-amber-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EAB308] text-slate-950 flex items-center justify-center shrink-0 shadow-sm">
+            {currentCategoryObj.isKetua ? <Award className="w-4 h-4 sm:w-5 sm:h-5" /> : <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
           <div>
-            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+            <h3 className="text-xs sm:text-base font-extrabold text-slate-900 dark:text-white">
               {currentCategoryObj.label}
             </h3>
             {currentCategoryVote ? (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Pilihan Muktamad Anda: <strong className="text-slate-900 dark:text-white underline">{currentCategoryVote.candidateName}</strong> ({currentCategoryVote.classId})</span>
+              <p className="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="truncate">Pilihan Muktamad: <strong className="text-slate-900 dark:text-white underline">{currentCategoryVote.candidateName}</strong> ({currentCategoryVote.classId})</span>
               </p>
             ) : (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Sila klik butang undi pada calon pilihan anda di bawah. Undian adalah muktamad.
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Sila klik butang undi pada calon pilihan anda. Undian adalah muktamad.
               </p>
             )}
           </div>
         </div>
 
         {/* Status for Active Category */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
           {currentCategoryVoted ? (
-            <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span>Undian Muktamad (Selesai)</span>
+            <div className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-[11px] sm:text-xs font-bold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Selesai (Muktamad)</span>
             </div>
           ) : (
-            <span className="px-3.5 py-1.5 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-800 dark:text-amber-300 text-xs font-bold">
+            <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-800 dark:text-amber-300 text-[11px] sm:text-xs font-bold">
               Belum Mengundi
             </span>
           )}
         </div>
       </div>
 
-      {/* Candidates Grid - Once voted, all candidate buttons in this category are locked (NO AMENDMENT CAN BE MADE) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Candidates Grid - Stretched to mobile view margins */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
         {candidates.map((cand, idx) => {
           const candidateVotesCount = votes.filter(
             (v) =>
@@ -285,7 +285,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
           return (
             <div
               key={`${cand.classId}-${idx}`}
-              className={`rounded-3xl border p-6 shadow-sm transition flex flex-col justify-between relative overflow-hidden ${
+              className={`rounded-2xl sm:rounded-3xl border p-3.5 sm:p-6 shadow-sm transition flex flex-col justify-between relative overflow-hidden ${
                 isMyCurrentVote
                   ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-500 ring-2 ring-emerald-400/50 shadow-md'
                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'

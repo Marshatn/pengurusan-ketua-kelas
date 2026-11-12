@@ -182,12 +182,12 @@ export const TabClasses: React.FC<TabClassesProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Top Banner (Clean, badge and subtitle removed as requested) */}
-      <div className="bg-[#0F172A] p-6 sm:p-8 rounded-3xl border border-amber-400/35 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden text-white">
+      <div className="bg-[#0F172A] p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl border border-amber-400/35 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 relative overflow-hidden text-white">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
-            <School className="w-6 h-6 text-amber-400 shrink-0" />
+          <h2 className="text-lg sm:text-2xl font-extrabold flex items-center gap-2">
+            <School className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 shrink-0" />
             <span>{dict.title} {selectedYear}</span>
           </h2>
         </div>
@@ -195,15 +195,15 @@ export const TabClasses: React.FC<TabClassesProps> = ({
         {/* Action Button: Print / Export Document */}
         <button
           onClick={() => setPrintModalOpen(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition whitespace-nowrap shrink-0 border border-amber-300 cursor-pointer"
+          className="flex items-center gap-2 px-3.5 py-2 sm:px-5 sm:py-3 bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition whitespace-nowrap shrink-0 border border-amber-300 cursor-pointer"
         >
-          <Printer className="w-4 h-4" />
+          <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>{dict.printBtn}</span>
         </button>
       </div>
 
       {/* Search & Class Counter Bar (Optimized for Mobile) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-white dark:bg-slate-900/90 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
           Jumlah Kelas: <span className="text-amber-500 font-mono font-extrabold">{classesData.length} Kelas (1M hingga 6B)</span>
         </div>
@@ -217,13 +217,13 @@ export const TabClasses: React.FC<TabClassesProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={dict.searchPlaceholder}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 py-2.5 pl-10 pr-4 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 py-2 sm:py-2.5 pl-10 pr-4 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
           />
         </div>
       </div>
 
       {/* Class Cards Grid (1M to 6B) - High-efficiency mobile view */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
         {filteredClasses.map((cls) => {
           const isRecentlySaved = savedStatusId === cls.id;
           const isEditing = editingClassId === cls.id;
@@ -231,7 +231,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
           return (
             <div
               key={cls.id}
-              className="bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden group"
+              className="bg-white dark:bg-slate-900/90 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition p-3.5 sm:p-6 flex flex-col justify-between relative overflow-hidden group"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">

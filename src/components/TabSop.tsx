@@ -13,26 +13,26 @@ export const TabSop: React.FC<TabSopProps> = ({ lang }) => {
   const dict = t[lang].sopTab;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Header Banner */}
-      <div className="bg-[#0F172A] p-6 sm:p-8 rounded-3xl border border-amber-400/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-white relative overflow-hidden">
+      <div className="bg-[#0F172A] p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl border border-amber-400/30 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-6 text-white relative overflow-hidden">
         <div className="relative z-10">
-          <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 mb-3 inline-block">
+          <span className="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 mb-2 inline-block">
             {dict.badge}
           </span>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-white">
             {dict.title}
           </h2>
-          <p className="text-xs text-amber-200/80 mt-1 max-w-2xl">
+          <p className="text-[11px] sm:text-xs text-amber-200/80 mt-1 max-w-2xl">
             {dict.desc}
           </p>
         </div>
       </div>
 
       {/* Grid of Roles & Responsibilities */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-6">
         {/* Ketua Kelas */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-6 shadow-sm flex flex-col justify-between">
           <div>
             <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mb-4">
               <Shield className="w-6 h-6" />

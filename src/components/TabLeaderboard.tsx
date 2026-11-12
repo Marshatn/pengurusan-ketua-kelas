@@ -231,22 +231,22 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Header Banner */}
-      <div className="bg-[#0F172A] p-6 sm:p-8 rounded-3xl border border-amber-400/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-white">
+      <div className="bg-[#0F172A] p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl border border-amber-400/30 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-6 text-white">
         <div>
-          <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 mb-3 inline-block">
+          <span className="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg bg-amber-400 text-slate-950 mb-2 inline-block">
             {dict.badge}
           </span>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-white">
             {dict.title} ({selectedYear})
           </h2>
-          <p className="text-xs text-amber-200/80 mt-1">
+          <p className="text-[11px] sm:text-xs text-amber-200/80 mt-1">
             {dict.desc}
           </p>
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 flex-wrap">
           {user.role === 'admin' && (
             <button
               onClick={() => {
@@ -260,26 +260,26 @@ export const TabLeaderboard: React.FC<TabLeaderboardProps> = ({ votes, classesDa
                   }, 500);
                 }
               }}
-              className="flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition whitespace-nowrap shrink-0 border border-amber-300 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-3 bg-[#EAB308] hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition whitespace-nowrap shrink-0 border border-amber-300 cursor-pointer"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Cetak Laporan</span>
             </button>
           )}
           
-          <div className="bg-slate-800/80 p-4 rounded-2xl border border-amber-400/30 text-center">
-            <p className="text-[11px] font-bold text-amber-300 uppercase">{dict.totalVotes}</p>
-            <p className="text-2xl font-extrabold text-amber-400 font-mono mt-0.5">{totalCategoryVotes}</p>
+          <div className="bg-slate-800/80 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-400/30 text-center">
+            <p className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase">{dict.totalVotes}</p>
+            <p className="text-lg sm:text-2xl font-extrabold text-amber-400 font-mono mt-0.5">{totalCategoryVotes}</p>
           </div>
-          <div className="bg-slate-800/80 p-4 rounded-2xl border border-amber-400/30 text-center">
-            <p className="text-[11px] font-bold text-amber-300 uppercase">{dict.activeVoters}</p>
-            <p className="text-2xl font-extrabold text-amber-400 font-mono mt-0.5">{uniqueVoters}</p>
+          <div className="bg-slate-800/80 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-400/30 text-center">
+            <p className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase">{dict.activeVoters}</p>
+            <p className="text-lg sm:text-2xl font-extrabold text-amber-400 font-mono mt-0.5">{uniqueVoters}</p>
           </div>
         </div>
       </div>
 
       {/* 4 Category Selection Buttons */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-3">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat.id;
 
