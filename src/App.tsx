@@ -22,7 +22,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch { /* ignore */ }
     }
-    return { role: 'admin', username: 'admin', name: 'Admin' };
+    return null;
   });
 
   const [selectedYear, setSelectedYear] = useState<number>(2026);
@@ -396,7 +396,10 @@ export default function App() {
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
             user={user}
-            onLogout={() => setUser(null)}
+            onLogout={() => {
+              localStorage.removeItem('sistem_pemimpin_session');
+              setUser(null);
+            }}
             lang={lang}
             setLang={setLang}
           />
