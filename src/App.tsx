@@ -10,9 +10,9 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
 import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
-import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
+import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord, VoteCategory } from './types';
 import { db } from './firebase';
-import { collection, doc, onSnapshot, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, deleteDoc, getDocs, getDocsFromServer } from 'firebase/firestore';
 
 export default function App() {
   const [lang, setLang] = useState<'ms' | 'zh'>('ms');
@@ -178,7 +178,10 @@ export default function App() {
       });
       list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setVotes(list);
-    }, (err) => console.error('Votes sync error:', err));
+    }, (err) => {
+      console.error('Votes sync error:', err);
+      addToast('Ralat sambungan Firestore: ' + (err.message || 'Gagal menyegerak undian'), 'error');
+    });
 
     const unsubChecklist = onSnapshot(collection(db, 'checklist'), (snap) => {
       if (!snap.empty) {
@@ -276,6 +279,58 @@ export default function App() {
     } catch (err: any) {
       console.error('Error writing vote to Firestore:', err);
       addToast('Ralat menyimpan undian ke cloud: ' + (err.message || 'Sila cuba lagi'), 'error');
+    }
+  };
+
+  const handleResetUserCategoryVote = async (year: number, category: VoteCategory, voterId: string) => {
+    const cleanVoterId = voterId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docId = `${year}_${category}_${cleanVoterId}`;
+    try {
+      await deleteDoc(doc(db, 'votes', docId));
+      setVotes((prev) => prev.filter((v) => v.id !== docId));
+      addToast('Undian kategori ini telah dipadam. Anda boleh mengundi semula calon lain sekarang!', 'info');
+    } catch (err: any) {
+      console.error('Error deleting category vote:', err);
+      addToast('Ralat memadam undian: ' + (err.message || 'Sila cuba lagi'), 'error');
+    }
+  };
+
+  const handleResetAllUserVotes = async (year: number, voterId: string) => {
+    try {
+      const userVotes = votes.filter((v) => v.year === year && v.voterId === voterId);
+      await Promise.all(userVotes.map((v) => deleteDoc(doc(db, 'votes', v.id))));
+      setVotes((prev) => prev.filter((v) => !(v.year === year && v.voterId === voterId)));
+      setCurrentCategoryIndex(0);
+      addToast('Semua undian anda telah diset semula. Anda kini boleh mengundi semula dari awal!', 'success');
+    } catch (err: any) {
+      console.error('Error resetting all user votes:', err);
+      addToast('Ralat mengeset semula undian: ' + (err.message || 'Sila cuba lagi'), 'error');
+    }
+  };
+
+  const handleForceSyncVotes = async () => {
+    try {
+      const snap = await getDocsFromServer(collection(db, 'votes'));
+      const list: VoteRecord[] = [];
+      snap.forEach(d => {
+        const data = d.data();
+        list.push({
+          id: d.id,
+          year: Number(data.year) || 2026,
+          voterId: String(data.voterId || ''),
+          voterName: String(data.voterName || ''),
+          category: data.category,
+          candidateName: String(data.candidateName || ''),
+          classId: String(data.classId || ''),
+          timestamp: String(data.timestamp || new Date().toISOString()),
+        });
+      });
+      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setVotes(list);
+      addToast(`Segerak berjaya: ${list.length} rekod undian terkini diterima dari Cloud Firestore!`, 'success');
+    } catch (err: any) {
+      console.error('Force sync error:', err);
+      addToast('Ralat segerak: ' + (err.message || 'Sila cuba lagi'), 'error');
     }
   };
 
@@ -429,6 +484,13 @@ export default function App() {
                 classesData={currentClasses}
                 votes={votes}
                 onCastVote={handleCastVote}
+                onResetUserCategoryVote={handleResetUserCategoryVote}
+                onResetAllUserVotes={handleResetAllUserVotes}
+                onForceSyncVotes={handleForceSyncVotes}
+                onLogout={() => {
+                  localStorage.removeItem('sistem_pemimpin_session');
+                  setUser(null);
+                }}
                 currentCategoryIndex={currentCategoryIndex}
                 setCurrentCategoryIndex={setCurrentCategoryIndex}
                 selectedYear={selectedYear}
@@ -436,7 +498,7 @@ export default function App() {
                 settings={settings}
                 addToast={addToast}
                 lang={lang}
-                teachers={teacherNames}
+                teachers={teachers}
               />
             )}
 

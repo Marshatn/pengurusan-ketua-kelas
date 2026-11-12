@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import defaultConfig from '../firebase-applet-config.json';
 
 const firebaseConfig = {
@@ -13,10 +13,16 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || defaultConfig.measurementId,
 };
 
-const firestoreDatabaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || import.meta.env.VITE_FIREBASE_DATABASE_ID || defaultConfig.firestoreDatabaseId;
+const rawDatabaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || import.meta.env.VITE_FIREBASE_DATABASE_ID || defaultConfig.firestoreDatabaseId;
+const firestoreDatabaseId = rawDatabaseId && rawDatabaseId.trim() !== '' ? rawDatabaseId.trim() : defaultConfig.firestoreDatabaseId;
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firestoreDatabaseId);
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
+// Configure Firestore with experimentalAutoDetectLongPolling for reliable cross-device real-time sync across mobile cellular networks & school Wi-Fi
+export const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+}, firestoreDatabaseId);
+
 export const auth = getAuth(app);
 
 // Automatically sign in anonymously so cross-device Firestore sync works seamlessly without login popups

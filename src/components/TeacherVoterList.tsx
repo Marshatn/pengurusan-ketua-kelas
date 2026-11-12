@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { CheckCircle2, Clock, ShieldCheck, UserCheck, Search, Filter, Lock, Users } from 'lucide-react';
-import { VoteRecord } from '../types';
+import { VoteRecord, TeacherRecord } from '../types';
 import { INITIAL_TEACHER_RECORDS } from '../data/initialData';
 
 interface TeacherVoterListProps {
   votes: VoteRecord[];
-  teachers: string[];
+  teachers: (TeacherRecord | string)[];
   selectedYear: number;
   lang: 'ms' | 'zh';
 }
@@ -19,6 +19,17 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
   const [filter, setFilter] = useState<'all' | 'voted' | 'pending'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Normalize teachers into objects with name and IC
+  const normalizedTeachers = useMemo<TeacherRecord[]>(() => {
+    return teachers.map((th, idx) => {
+      if (typeof th === 'string') {
+        const found = INITIAL_TEACHER_RECORDS.find((r) => r.name.trim().toUpperCase() === th.trim().toUpperCase());
+        return found || { name: th, ic: `85010112${String(idx + 1).padStart(4, '0')}` };
+      }
+      return th;
+    });
+  }, [teachers]);
+
   // Votes in the selected academic year
   const yearVotes = useMemo(() => {
     return votes.filter((v) => v.year === selectedYear);
@@ -26,15 +37,15 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
 
   // Aggregate teacher voting records
   const teacherStatusList = useMemo(() => {
-    return teachers.map((teacherName) => {
-      // Find all votes matching this teacher flexibly (exact name, voterId equals IC or name, or case-insensitive contains)
+    return normalizedTeachers.map((teacher) => {
+      const teacherName = teacher.name;
+      const tName = teacherName.trim().replace(/\s+/g, ' ').toUpperCase();
+      const tIc = (teacher.ic || '').replace(/[-\s]/g, '').toUpperCase();
+
+      // Find all votes matching this teacher flexibly (exact IC, exact name, or case-insensitive contains)
       const matchingVotes = yearVotes.filter((v) => {
         const vName = (v.voterName || '').trim().replace(/\s+/g, ' ').toUpperCase();
         const vId = (v.voterId || '').trim().replace(/[-\s]/g, '').toUpperCase();
-        const tName = teacherName.trim().replace(/\s+/g, ' ').toUpperCase();
-
-        const matchedRecord = INITIAL_TEACHER_RECORDS.find((r) => r.name.trim().replace(/\s+/g, ' ').toUpperCase() === tName);
-        const tIc = matchedRecord ? matchedRecord.ic.replace(/[-\s]/g, '').toUpperCase() : '';
 
         const matchIc = tIc && (vId === tIc || vName === tIc);
         const matchName = vName === tName || vId === tName || vName.includes(tName) || tName.includes(vName) || vId.includes(tName);
@@ -63,10 +74,10 @@ export const TeacherVoterList: React.FC<TeacherVoterListProps> = ({
         latestTimestamp,
       };
     });
-  }, [teachers, yearVotes]);
+  }, [normalizedTeachers, yearVotes]);
 
   // Summary counts
-  const totalTeachers = teachers.length;
+  const totalTeachers = normalizedTeachers.length;
   const votedTeachersCount = teacherStatusList.filter((t) => t.hasVoted).length;
   const pendingTeachersCount = totalTeachers - votedTeachersCount;
   const turnoutPercent = totalTeachers > 0 ? ((votedTeachersCount / totalTeachers) * 100).toFixed(1) : '0';

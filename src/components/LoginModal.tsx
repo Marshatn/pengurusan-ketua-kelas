@@ -25,6 +25,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // Reset inputs whenever modal opens (e.g. after clean logout)
+  React.useEffect(() => {
+    if (isOpen) {
+      setPassword('');
+      setError('');
+    }
+  }, [isOpen]);
+
   const handlePasswordChange = (val: string) => {
     setPassword(val);
     setError('');
