@@ -8,6 +8,8 @@ interface TabVotingProps {
   classesData: ClassLeaderData[];
   votes: VoteRecord[];
   onCastVote: (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => void | Promise<void>;
+  currentCategoryIndex: number;
+  setCurrentCategoryIndex: React.Dispatch<React.SetStateAction<number>>;
   selectedYear: number;
   user: UserSession;
   settings: SystemSettings;
@@ -20,6 +22,8 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   classesData,
   votes,
   onCastVote,
+  currentCategoryIndex,
+  setCurrentCategoryIndex,
   selectedYear,
   user,
   settings,
@@ -27,7 +31,6 @@ export const TabVoting: React.FC<TabVotingProps> = ({
   lang,
   teachers,
 }) => {
-  const [categoryIndex, setCategoryIndex] = useState<number>(0);
   const [confirmModalCandidate, setConfirmModalCandidate] = useState<{
     name: string;
     classId: string;
@@ -67,7 +70,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
     },
   ];
 
-  const currentCategoryObj = CATEGORIES[categoryIndex] || CATEGORIES[0];
+  const currentCategoryObj = CATEGORIES[currentCategoryIndex] || CATEGORIES[0];
   const activeCategory = currentCategoryObj.id;
 
   // Tahap 1: Grades 1 - 3, Tahap 2: Grade 6
@@ -113,18 +116,6 @@ export const TabVoting: React.FC<TabVotingProps> = ({
       category: candidate.category,
       candidateName: candidate.name,
       classId: candidate.classId,
-    });
-
-    // Auto-advance categoryIndex state to the next category until the end
-    setCategoryIndex((prev) => {
-      if (prev < CATEGORIES.length - 1) {
-        const nextIdx = prev + 1;
-        addToast(`Undian berjaya! Seterusnya: ${CATEGORIES[nextIdx].label}`, 'success');
-        return nextIdx;
-      } else {
-        addToast('Tahniah! Anda telah selesai mengundi kesemua kategori.', 'success');
-        return prev;
-      }
     });
   };
 
@@ -179,7 +170,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
                     if (idx > firstUnvotedIndex && firstUnvotedIndex !== -1) {
                       addToast('Sila lengkapkan undian kategori terdahulu terlebih dahulu!', 'error');
                     }
-                    setCategoryIndex(idx);
+                    setCurrentCategoryIndex(idx);
                   }}
                   className={`p-4 rounded-2xl text-left transition flex flex-col justify-between border relative cursor-pointer ${cardStyle}`}
                 >

@@ -27,6 +27,7 @@ export default function App() {
 
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [activeTab, setActiveTab] = useState<string>('classes');
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
 
   // Teachers master list with Name and IC support
   const [teachers, setTeachers] = useState<TeacherRecord[]>(() => {
@@ -260,13 +261,18 @@ export default function App() {
       timestamp: new Date().toISOString(),
     };
 
-    // Optimistic local state update so UI updates immediately
-    setVotes((prev) => [newRecord, ...prev.filter(v => v.id !== docId)]);
-
     try {
-      // Direct write to Cloud Firestore immediately
+      // 1. Verify Firestore write is confirmed before advancing
       await setDoc(doc(db, 'votes', docId), newRecord);
-      addToast(`Undian anda bagi kategori ini berjaya direkodkan!`, 'success');
+
+      // 2. Update votes state
+      setVotes((prev) => [newRecord, ...prev.filter(v => v.id !== docId)]);
+
+      // 3. Visual feedback
+      addToast(`Undian berjaya disahkan dan disimpan ke Cloud Firestore!`, 'success');
+
+      // 4. Advance parent state to next category
+      setCurrentCategoryIndex((prev) => Math.min(prev + 1, 3));
     } catch (err: any) {
       console.error('Error writing vote to Firestore:', err);
       addToast('Ralat menyimpan undian ke cloud: ' + (err.message || 'Sila cuba lagi'), 'error');
@@ -420,6 +426,8 @@ export default function App() {
                 classesData={currentClasses}
                 votes={votes}
                 onCastVote={handleCastVote}
+                currentCategoryIndex={currentCategoryIndex}
+                setCurrentCategoryIndex={setCurrentCategoryIndex}
                 selectedYear={selectedYear}
                 user={user}
                 settings={settings}
