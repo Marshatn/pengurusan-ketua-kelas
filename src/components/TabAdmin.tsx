@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Lock, Unlock, RefreshCw, Database, Download, Megaphone, ShieldCheck, UserPlus, Trash2, Users, Search, AlertTriangle, KeyRound } from 'lucide-react';
+import { Settings, Lock, Unlock, RefreshCw, Database, Download, Upload, Megaphone, ShieldCheck, UserPlus, Trash2, Users, Search, AlertTriangle, KeyRound } from 'lucide-react';
 import { SystemSettings, UserSession, TeacherRecord } from '../types';
 import { t } from '../translations';
 
@@ -16,6 +16,10 @@ interface TabAdminProps {
   teachers: TeacherRecord[];
   onAddTeacher: (name: string, ic: string) => void;
   onRemoveTeacher: (name: string) => void;
+  classesByYear: { [year: number]: any };
+  votes: any[];
+  checklist: any[];
+  onImportData: (data: any) => void;
 }
 
 export const TabAdmin: React.FC<TabAdminProps> = ({
@@ -31,6 +35,10 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
   teachers,
   onAddTeacher,
   onRemoveTeacher,
+  classesByYear,
+  votes,
+  checklist,
+  onImportData,
 }) => {
   const [announcementText, setAnnouncementText] = useState(settings.announcement);
   const [newTeacherName, setNewTeacherName] = useState('');
@@ -45,7 +53,7 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
       <div className="p-8 rounded-3xl bg-rose-50 border border-rose-200 text-center">
         <ShieldCheck className="w-12 h-12 text-rose-500 mx-auto mb-3" />
         <h3 className="text-lg font-bold text-rose-800">Akses Terhad Pentadbir</h3>
-        <p className="text-xs text-rose-600 mt-1">Anda perlu log masuk sebagai Admin / Guru Penasihat untuk mengakses panel tetapan ini.</p>
+        <p className="text-xs text-rose-600 mt-1">Anda perlu log masuk sebagai Admin untuk mengakses panel tetapan ini.</p>
       </div>
     );
   }
@@ -103,14 +111,41 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
   };
 
   const handleExportJson = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(localStorage, null, 2));
+    const backupData = {
+      teachers,
+      classesByYear,
+      votes,
+      checklist,
+      settings,
+      exportDate: new Date().toISOString()
+    };
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `sistem_pemimpin_murid_${selectedYear}_backup.json`);
+    downloadAnchor.setAttribute('download', `sistem_pemimpin_murid_backup_${selectedYear}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
     addToast('Fail sandaran JSON berjaya dieksport!', 'success');
+  };
+
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    if (e.target.files && e.target.files[0]) {
+      fileReader.readAsText(e.target.files[0], "UTF-8");
+      fileReader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          onImportData(parsed);
+          addToast('Fail JSON berjaya diimport ke dalam sistem!', 'success');
+        } catch (err) {
+          console.error(err);
+          addToast('Gagal membaca fail JSON. Pastikan format fail sah.', 'error');
+        }
+      };
+    }
+    // Reset input value so same file can be re-imported if needed
+    e.target.value = '';
   };
 
   const filteredTeachers = teachers.filter((t) => {
@@ -306,7 +341,7 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
         </div>
       </div>
 
-      {/* In-App Delete Confirmation Modal (Guaranteed to work in iframe without window.confirm) */}
+      {/* In-App Delete Confirmation Modal */}
       {teacherToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-900">
@@ -341,13 +376,38 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
         </div>
       )}
 
-      {/* Data Management & Backup */}
+      {/* Data Management & Backup & JSON Import/Export */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
           <Database className="w-5 h-5 text-amber-500" />
-          <span>{dict.dataBackup}</span>
+          <span>Pengurusan Data, Eksport & Import JSON</span>
         </h3>
+        <p className="text-xs text-slate-500 mb-6">
+          Eksport keseluruhan data sistem ke fail JSON untuk sandaran, atau import semula fail JSON sandaran ke dalam sistem.
+        </p>
 
+        <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-slate-100">
+          <button
+            onClick={handleExportJson}
+            className="flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition shadow-md cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Eksport Data JSON</span>
+          </button>
+
+          <label className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl transition shadow-md cursor-pointer">
+            <Upload className="w-4 h-4" />
+            <span>Import Data JSON</span>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportJson}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">Tetapan Tetapan Semula (Reset Data)</h4>
         <div className="flex flex-wrap gap-4">
           <button
             onClick={() => {

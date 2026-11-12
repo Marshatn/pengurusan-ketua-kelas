@@ -1,0 +1,91 @@
+{
+  "entities": {
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Teacher master record",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "ic": { "type": "string", "maxLength": 20 }
+      },
+      "required": ["name", "ic"]
+    },
+    "ClassLeader": {
+      "title": "ClassLeader",
+      "description": "Class leader and teacher assignment data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 20 },
+        "year": { "type": "integer" },
+        "name": { "type": "string", "maxLength": 100 },
+        "grade": { "type": "integer" },
+        "teacherName": { "type": "string", "maxLength": 100 },
+        "headPrefect": { "type": "string", "maxLength": 100 },
+        "assistantPrefect": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "year", "name", "grade", "teacherName", "headPrefect", "assistantPrefect"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "description": "Voting record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 30 },
+        "year": { "type": "integer" },
+        "voterId": { "type": "string", "maxLength": 50 },
+        "voterName": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 50 },
+        "candidateName": { "type": "string", "maxLength": 100 },
+        "classId": { "type": "string", "maxLength": 20 },
+        "timestamp": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "year", "voterId", "category", "candidateName", "classId", "timestamp"]
+    },
+    "ChecklistTask": {
+      "title": "ChecklistTask",
+      "description": "Daily checklist task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 30 },
+        "category": { "type": "string", "maxLength": 30 },
+        "session": { "type": "string", "maxLength": 30 },
+        "task": { "type": "string", "maxLength": 300 },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["id", "category", "session", "task", "completed"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "System settings",
+      "type": "object",
+      "properties": {
+        "votingOpen": { "type": "boolean" },
+        "announcement": { "type": "string", "maxLength": 500 },
+        "schoolName": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["votingOpen", "announcement", "schoolName"]
+    }
+  },
+  "firestore": {
+    "/teachers/{teacherId}": {
+      "schema": { "$ref": "Teacher" },
+      "description": "Teachers collection"
+    },
+    "/classes/{classDocId}": {
+      "schema": { "$ref": "ClassLeader" },
+      "description": "Classes collection by year and class ID"
+    },
+    "/votes/{voteId}": {
+      "schema": { "$ref": "Vote" },
+      "description": "Votes collection"
+    },
+    "/checklist/{taskId}": {
+      "schema": { "$ref": "ChecklistTask" },
+      "description": "Checklist tasks collection"
+    },
+    "/settings/{settingsId}": {
+      "schema": { "$ref": "Settings" },
+      "description": "System settings document"
+    }
+  }
+}

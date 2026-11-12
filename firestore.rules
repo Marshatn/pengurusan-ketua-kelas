@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidTeacher(data) {
+      return data.keys().hasAll(['name', 'ic']) &&
+        data.keys().hasOnly(['name', 'ic']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.ic is string && data.ic.size() > 0 && data.ic.size() <= 20;
+    }
+
+    function isValidClassLeader(data) {
+      return data.keys().hasAll(['id', 'year', 'name', 'grade', 'teacherName', 'headPrefect', 'assistantPrefect']) &&
+        data.keys().hasOnly(['id', 'year', 'name', 'grade', 'teacherName', 'headPrefect', 'assistantPrefect']) &&
+        data.id is string && data.id.size() <= 20 &&
+        data.year is int &&
+        data.name is string && data.name.size() <= 100 &&
+        data.grade is int &&
+        data.teacherName is string && data.teacherName.size() <= 100 &&
+        data.headPrefect is string && data.headPrefect.size() <= 100 &&
+        data.assistantPrefect is string && data.assistantPrefect.size() <= 100;
+    }
+
+    function isValidVote(data) {
+      return data.keys().hasAll(['id', 'year', 'voterId', 'category', 'candidateName', 'classId', 'timestamp']) &&
+        data.keys().hasOnly(['id', 'year', 'voterId', 'voterName', 'category', 'candidateName', 'classId', 'timestamp']) &&
+        data.id is string && data.id.size() <= 30 &&
+        data.year is int &&
+        data.voterId is string && data.voterId.size() <= 50 &&
+        (!('voterName' in data) || (data.voterName is string && data.voterName.size() <= 100)) &&
+        data.category is string && data.category.size() <= 50 &&
+        data.candidateName is string && data.candidateName.size() <= 100 &&
+        data.classId is string && data.classId.size() <= 20 &&
+        data.timestamp is string && data.timestamp.size() <= 50;
+    }
+
+    function isValidChecklistTask(data) {
+      return data.keys().hasAll(['id', 'category', 'session', 'task', 'completed']) &&
+        data.keys().hasOnly(['id', 'category', 'session', 'task', 'completed']) &&
+        data.id is string && data.id.size() <= 30 &&
+        data.category is string && data.category.size() <= 30 &&
+        data.session is string && data.session.size() <= 30 &&
+        data.task is string && data.task.size() <= 300 &&
+        data.completed is bool;
+    }
+
+    function isValidSettings(data) {
+      return data.keys().hasAll(['votingOpen', 'announcement', 'schoolName']) &&
+        data.keys().hasOnly(['votingOpen', 'announcement', 'schoolName']) &&
+        data.votingOpen is bool &&
+        data.announcement is string && data.announcement.size() <= 500 &&
+        data.schoolName is string && data.schoolName.size() <= 200;
+    }
+
+    match /teachers/{teacherId} {
+      allow read, write: if isSignedIn() && isValidId(teacherId);
+    }
+
+    match /classes/{classDocId} {
+      allow read, write: if isSignedIn() && isValidId(classDocId);
+    }
+
+    match /votes/{voteId} {
+      allow read, write: if isSignedIn() && isValidId(voteId);
+    }
+
+    match /checklist/{taskId} {
+      allow read, write: if isSignedIn() && isValidId(taskId);
+    }
+
+    match /settings/{settingsId} {
+      allow read, write: if isSignedIn() && isValidId(settingsId);
+    }
+  }
+}

@@ -120,7 +120,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
     <div class="sign-box">
       <div class="sign-line"></div>
       <strong>Disediakan Oleh:</strong><br>
-      Guru Penasihat / Guru Disiplin<br>
+      Guru Kelas / Disiplin<br>
       SJK (C) Chung Hwa Kota Belud
     </div>
     <div class="sign-box">
@@ -472,7 +472,7 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                 <div className="text-center w-48">
                   <div className="h-14 border-b border-slate-800" />
                   <p className="mt-2 font-bold text-slate-900">Disediakan Oleh:</p>
-                  <p className="text-[11px] text-slate-600">Guru Penasihat / Disiplin</p>
+                  <p className="text-[11px] text-slate-600">Guru Kelas / Disiplin</p>
                 </div>
                 <div className="text-center w-48">
                   <div className="h-14 border-b border-slate-800" />

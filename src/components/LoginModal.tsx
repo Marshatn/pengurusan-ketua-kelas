@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, UserCheck, Lock, User, KeyRound, Globe, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, UserCheck, Lock, User, KeyRound, Globe, AlertCircle } from 'lucide-react';
 import { Role, UserSession, TeacherRecord } from '../types';
 import { NeonBackground } from './NeonBackground';
 import { t } from '../translations';
@@ -13,7 +13,6 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, setLang, teachers }) => {
-  // Normalize teachers into TeacherRecord[]
   const normalizedTeachers: TeacherRecord[] = teachers.map((th, idx) => {
     if (typeof th === 'string') {
       return { name: th, ic: `85010112${String(idx + 1).padStart(4, '0')}` };
@@ -22,26 +21,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
   });
 
   const [selectedRole, setSelectedRole] = useState<Role>('teacher');
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
   const [adminUsername, setAdminUsername] = useState('admin');
   const [password, setPassword] = useState('');
-  const [detectedTeacherName, setDetectedTeacherName] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  // When selected teacher changes from dropdown
-  const handleSelectTeacherChange = (teacherName: string) => {
-    setSelectedTeacher(teacherName);
-    setError('');
-    // Remove auto-fill of IC
-    setDetectedTeacherName(null);
-  };
-
-  // When user types in password / IC field
   const handlePasswordChange = (val: string) => {
     setPassword(val);
     setError('');
-    // Remove auto-detection based on IC
-    setDetectedTeacherName(null);
   };
 
   if (!isOpen) return null;
@@ -54,12 +40,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
 
     if (selectedRole === 'admin') {
       if (adminUsername.trim().toLowerCase() === 'admin' && password.trim() === 'mptan') {
-        onLogin({ role: 'admin', username: 'admin', name: 'Admin / Guru Penasihat Utama' });
+        onLogin({ role: 'admin', username: 'admin', name: 'Admin Utama' });
       } else {
         setError(
           lang === 'ms'
-            ? 'ID Staff atau Kata Laluan Admin tidak sah. (Password: mptan)'
-            : '用户名或管理员密码无效。(密码: mptan)'
+            ? 'ID Staff atau Kata Laluan Admin tidak sah.'
+            : '用户名或管理员密码无效。'
         );
       }
     } else if (selectedRole === 'teacher') {
@@ -74,19 +60,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
         return;
       }
 
-      // Check if IC matches a registered teacher
       const matchedByIC = normalizedTeachers.find(
         (t) => t.ic.replace(/[-\s]/g, '') === cleanIC
       );
-      const matchedByName = normalizedTeachers.find(
-        (t) => t.name.toUpperCase() === selectedTeacher.trim().toUpperCase()
-      );
 
-      if (!matchedByIC || !matchedByName || matchedByIC !== matchedByName) {
+      if (!matchedByIC) {
         setError(
           lang === 'ms'
-            ? 'Nama Guru dan Nombor Kad Pengenalan (IC) tidak sepadan.'
-            : '教师姓名与身份证号码（IC）不匹配。'
+            ? 'Nombor Kad Pengenalan (IC) tidak dijumpai dalam senarai guru yang sah.'
+            : '在有效的教师名单中未找到该身份证号码（IC）。'
         );
         return;
       }
@@ -94,7 +76,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
       onLogin({
         role: 'teacher',
         username: cleanIC,
-        name: matchedByName.name,
+        name: matchedByIC.name,
       });
     }
   };
@@ -103,15 +85,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
     setSelectedRole(role);
     setError('');
     setPassword('');
-    setDetectedTeacherName(null);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden select-none">
-      {/* Bright & Luminous Ambient Background */}
       <NeonBackground variant="login" />
 
-      {/* Language Switcher in Corner */}
       <div className="absolute top-5 right-5 z-20">
         <button
           type="button"
@@ -123,9 +102,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
         </button>
       </div>
 
-      {/* Clean, Bright Frosted Glass Login Card */}
       <div className="relative z-10 w-full max-w-lg rounded-3xl bg-white/95 backdrop-blur-xl border border-sky-200/90 shadow-[0_20px_60px_-15px_rgba(14,165,233,0.25)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-900">
-        {/* Header */}
         <div className="bg-gradient-to-r from-[#0F172A] via-blue-900 to-[#0F172A] p-6 text-white text-center relative border-b border-amber-400/30">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-3 shadow-lg border-2 border-amber-300 overflow-hidden p-1">
             <img
@@ -136,7 +113,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
             />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-white">{dict.title}</h2>
-          <p className="text-xs text-amber-300 mt-1 font-medium">{dict.subtitle}</p>
+          <p className="text-xs text-amber-300 mt-1 font-medium">{dict.subtitle} (Cloud Sync Enabled)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-white text-slate-800">
@@ -181,44 +158,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
           )}
 
           <div className="space-y-4">
-            {selectedRole === 'teacher' ? (
-              <>
-                {/* Teacher Selection Dropdown */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    {dict.selectTeacher}
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                      <User className="w-4 h-4" />
-                    </span>
-                    <select
-                      value={selectedTeacher}
-                      onChange={(e) => handleSelectTeacherChange(e.target.value)}
-                      required
-                      className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                    >
-                      <option value="" className="text-slate-500">
-                        {lang === 'ms' ? 'Pilih Nama' : '选择姓名'}
-                      </option>
-                      {normalizedTeachers.map((th) => (
-                        <option key={th.name} value={th.name} className="text-slate-900">
-                          {th.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Auto Detection Banner when matched */}
-                {detectedTeacherName && (
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300/80 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>✓ Guru Dikesan: {detectedTeacherName}</span>
-                  </div>
-                )}
-              </>
-            ) : (
+            {selectedRole === 'admin' && (
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   {dict.staffId}
@@ -258,7 +198,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, lang, s
                   className="w-full rounded-xl border border-slate-300 bg-slate-50/70 py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 font-mono"
                 />
               </div>
-                {/* Auto-detection message removed */}
             </div>
           </div>
 

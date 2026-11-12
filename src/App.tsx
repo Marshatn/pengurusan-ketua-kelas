@@ -9,7 +9,7 @@ import { TabAdmin } from './components/TabAdmin';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
-import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, TEACHER_LIST, INITIAL_TEACHER_RECORDS } from './data/initialData';
+import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch { /* ignore */ }
     }
-    return { role: 'admin', username: 'admin', name: 'Admin / Guru Penasihat' };
+    return { role: 'admin', username: 'admin', name: 'Admin' };
   });
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
@@ -201,6 +201,20 @@ export default function App() {
     addToast('Data undian telah ditetapkan semula.', 'info');
   };
 
+  const handleImportData = (data: any) => {
+    try {
+      if (data.teachers && Array.isArray(data.teachers)) setTeachers(data.teachers);
+      if (data.classesByYear && typeof data.classesByYear === 'object') setClassesByYear(data.classesByYear);
+      if (data.votes && Array.isArray(data.votes)) setVotes(data.votes);
+      if (data.checklist && Array.isArray(data.checklist)) setChecklist(data.checklist);
+      if (data.settings && typeof data.settings === 'object') setSettings(data.settings);
+      addToast('Data sistem berjaya diimport daripada fail JSON!', 'success');
+    } catch (err) {
+      console.error(err);
+      addToast('Gagal mengimport fail JSON. Format tidak sah.', 'error');
+    }
+  };
+
   return (
     <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-24 md:pb-16">
       {/* Slow Moving Automatic Neon Background for Main App Screen */}
@@ -300,6 +314,10 @@ export default function App() {
                 teachers={teachers}
                 onAddTeacher={handleAddTeacher}
                 onRemoveTeacher={handleRemoveTeacher}
+                classesByYear={classesByYear}
+                votes={votes}
+                checklist={checklist}
+                onImportData={handleImportData}
               />
             )}
           </main>

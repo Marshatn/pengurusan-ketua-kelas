@@ -1,4 +1,4 @@
-import { ClassLeaderData, DailyChecklistTask, SystemSettings, TeacherRecord } from '../types';
+import { ClassLeaderData, DailyChecklistTask, SystemSettings, TeacherRecord, VoteRecord } from '../types';
 
 export const INITIAL_CLASSES_2026: ClassLeaderData[] = [
   {

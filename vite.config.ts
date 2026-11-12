@@ -11,6 +11,9 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        },
         includeAssets: ['school_logo.jpg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'bg_wave.png'],
         manifest: {
           id: '/',
