@@ -11,7 +11,8 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
 import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
-import { db } from './firebase';
+import { db, auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 export default function App() {
@@ -64,7 +65,7 @@ export default function App() {
         const migrated: { [year: number]: ClassLeaderData[] } = {};
         for (const [yr, list] of Object.entries(parsed)) {
           migrated[Number(yr)] = (list as ClassLeaderData[]).map((c) => {
-            let newName = c.name
+            const newName = c.name
               .replace(/Mawar/gi, 'Merah')
               .replace(/Kenanga/gi, 'Kuning')
               .replace(/Melati/gi, 'Biru');
@@ -115,84 +116,102 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Real-time Firestore Sync Listeners for cross-device sync
+  // Real-time Firestore Sync Listeners (attached once Anonymous Auth is ready)
   useEffect(() => {
-    const unsubSettings = onSnapshot(doc(db, 'settings', 'main'), (snap) => {
-      if (snap.exists()) {
-        setSettings(snap.data() as SystemSettings);
-      } else {
-        // Auto-seed default settings to Cloud Firestore if missing
-        setDoc(doc(db, 'settings', 'main'), INITIAL_SETTINGS).catch(console.error);
-      }
-    }, (err) => console.error('Settings sync error:', err));
+    let unsubSettings: (() => void) | undefined;
+    let unsubTeachers: (() => void) | undefined;
+    let unsubClasses: (() => void) | undefined;
+    let unsubVotes: (() => void) | undefined;
+    let unsubChecklist: (() => void) | undefined;
 
-    const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snap) => {
-      if (!snap.empty) {
-        const list: TeacherRecord[] = [];
-        snap.forEach(d => list.push(d.data() as TeacherRecord));
-        if (list.length > 0) setTeachers(list);
-      } else {
-        INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG')).forEach((th) => {
-          setDoc(doc(db, 'teachers', th.ic), th).catch(console.error);
-        });
-      }
-    }, (err) => console.error('Teachers sync error:', err));
+    const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
+      if (!fbUser) return;
 
-    const unsubClasses = onSnapshot(collection(db, 'classes'), (snap) => {
-      if (!snap.empty) {
+      // 1. Settings / Pengumuman listener (DO NOT auto-overwrite with INITIAL_SETTINGS)
+      unsubSettings = onSnapshot(doc(db, 'settings', 'main'), (snap) => {
+        if (snap.exists()) {
+          setSettings(snap.data() as SystemSettings);
+        }
+      }, (err) => console.error('Settings sync error:', err));
+
+      // 2. Teachers listener
+      unsubTeachers = onSnapshot(collection(db, 'teachers'), (snap) => {
+        if (!snap.empty) {
+          const list: TeacherRecord[] = [];
+          snap.forEach(d => list.push(d.data() as TeacherRecord));
+          if (list.length > 0) setTeachers(list);
+        } else {
+          INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG')).forEach((th) => {
+            setDoc(doc(db, 'teachers', th.ic), th).catch(console.error);
+          });
+        }
+      }, (err) => console.error('Teachers sync error:', err));
+
+      // 3. Classes listener (backfills any missing classes from 1M to 6B)
+      unsubClasses = onSnapshot(collection(db, 'classes'), (snap) => {
         const byYear: { [year: number]: ClassLeaderData[] } = {};
+        const existing2026Ids = new Set<string>();
+
         snap.forEach(d => {
           const data = d.data() as ClassLeaderData & { year?: number };
-          const yr = data.year || 2026;
+          const yr = Number(data.year) || 2026;
           if (!byYear[yr]) byYear[yr] = [];
           byYear[yr].push(data);
+          if (yr === 2026) existing2026Ids.add(data.id);
         });
+
+        const missing2026 = INITIAL_CLASSES_2026.filter(c => !existing2026Ids.has(c.id));
+        if (missing2026.length > 0) {
+          missing2026.forEach((c) => {
+            setDoc(doc(db, 'classes', `2026_${c.id}`), { ...c, year: 2026 }).catch(console.error);
+          });
+        }
+
         if (Object.keys(byYear).length > 0) {
           for (const yr of Object.keys(byYear)) {
             byYear[Number(yr)].sort((a, b) => a.id.localeCompare(b.id));
           }
           setClassesByYear(byYear);
         }
-      } else {
-        INITIAL_CLASSES_2026.forEach((c) => {
-          setDoc(doc(db, 'classes', `2026_${c.id}`), { ...c, year: 2026 }).catch(console.error);
-        });
-      }
-    }, (err) => console.error('Classes sync error:', err));
+      }, (err) => console.error('Classes sync error:', err));
 
-    const unsubVotes = onSnapshot(collection(db, 'votes'), (snap) => {
-      const list: VoteRecord[] = [];
-      snap.forEach(d => {
-        const data = d.data();
-        list.push({
-          id: d.id,
-          year: Number(data.year) || 2026,
-          voterId: String(data.voterId || ''),
-          voterName: String(data.voterName || ''),
-          category: data.category,
-          candidateName: String(data.candidateName || ''),
-          classId: String(data.classId || ''),
-          timestamp: String(data.timestamp || new Date().toISOString()),
+      // 4. Votes real-time listener
+      unsubVotes = onSnapshot(collection(db, 'votes'), (snap) => {
+        const list: VoteRecord[] = [];
+        snap.forEach(d => {
+          const data = d.data();
+          list.push({
+            id: d.id,
+            year: Number(data.year) || 2026,
+            voterId: String(data.voterId || ''),
+            voterName: String(data.voterName || ''),
+            category: data.category,
+            candidateName: String(data.candidateName || ''),
+            classId: String(data.classId || ''),
+            timestamp: String(data.timestamp || new Date().toISOString()),
+          });
         });
-      });
-      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      setVotes(list);
-    }, (err) => console.error('Votes sync error:', err));
+        list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setVotes(list);
+      }, (err) => console.error('Votes sync error:', err));
 
-    const unsubChecklist = onSnapshot(collection(db, 'checklist'), (snap) => {
-      if (!snap.empty) {
-        const list: DailyChecklistTask[] = [];
-        snap.forEach(d => list.push(d.data() as DailyChecklistTask));
-        setChecklist(list);
-      }
-    }, (err) => console.error('Checklist sync error:', err));
+      // 5. Checklist listener
+      unsubChecklist = onSnapshot(collection(db, 'checklist'), (snap) => {
+        if (!snap.empty) {
+          const list: DailyChecklistTask[] = [];
+          snap.forEach(d => list.push(d.data() as DailyChecklistTask));
+          setChecklist(list);
+        }
+      }, (err) => console.error('Checklist sync error:', err));
+    });
 
     return () => {
-      unsubSettings();
-      unsubTeachers();
-      unsubClasses();
-      unsubVotes();
-      unsubChecklist();
+      unsubAuth();
+      unsubSettings?.();
+      unsubTeachers?.();
+      unsubClasses?.();
+      unsubVotes?.();
+      unsubChecklist?.();
     };
   }, []);
 
@@ -251,19 +270,25 @@ export default function App() {
   };
 
   const handleCastVote = async (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => {
-    // Unique deterministic document ID per voter per category per year prevents duplicates across devices
-    const cleanVoterId = vote.voterId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const docId = `${vote.year}_${vote.category}_${cleanVoterId}`;
+    const cleanVoterId = (vote.voterId || 'admin').replace(/[^a-zA-Z0-9_-]/g, '_');
+    // Ensure multiple devices using default 'admin' create separate vote documents instead of overwriting each other
+    const isGenericAdmin = cleanVoterId.toLowerCase() === 'admin' || cleanVoterId === '';
+    const uniqueSuffix = isGenericAdmin
+      ? `_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+      : '';
+    const docId = `${vote.year}_${vote.category}_${cleanVoterId}${uniqueSuffix}`;
+
     const newRecord: VoteRecord = {
       ...vote,
+      year: Number(vote.year) || selectedYear,
+      voterId: isGenericAdmin ? `${cleanVoterId}${uniqueSuffix}` : vote.voterId,
       id: docId,
       timestamp: new Date().toISOString(),
     };
 
     try {
-      // Direct write to Cloud Firestore immediately
       await setDoc(doc(db, 'votes', docId), newRecord);
-      addToast(`Undian anda bagi kategori ini berjaya direkodkan ke Cloud Firestore!`, 'success');
+      addToast('Undian anda bagi kategori ini berjaya direkodkan ke Cloud Firestore!', 'success');
     } catch (err: any) {
       console.error('Error writing vote to Firestore:', err);
       addToast('Ralat menyimpan undian ke cloud: ' + (err.message || 'Sila cuba lagi'), 'error');
@@ -371,7 +396,6 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-[#EAB308] selection:text-slate-950 pb-24 md:pb-16">
-      {/* Slow Moving Automatic Neon Background for Main App Screen */}
       <NeonBackground variant="app" />
 
       <LoginModal isOpen={!user} onLogin={(sess) => setUser(sess)} lang={lang} setLang={setLang} teachers={teachers} />
