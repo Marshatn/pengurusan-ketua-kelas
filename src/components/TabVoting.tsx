@@ -116,12 +116,16 @@ export const TabVoting: React.FC<TabVotingProps> = ({
     });
 
     // Auto-advance categoryIndex state to the next category until the end
-    if (categoryIndex < CATEGORIES.length - 1) {
-      setCategoryIndex((prev) => prev + 1);
-      addToast(`Undian berjaya! Seterusnya: ${CATEGORIES[categoryIndex + 1].label}`, 'success');
-    } else {
-      addToast('Tahniah! Anda telah selesai mengundi kesemua kategori.', 'success');
-    }
+    setCategoryIndex((prev) => {
+      if (prev < CATEGORIES.length - 1) {
+        const nextIdx = prev + 1;
+        addToast(`Undian berjaya! Seterusnya: ${CATEGORIES[nextIdx].label}`, 'success');
+        return nextIdx;
+      } else {
+        addToast('Tahniah! Anda telah selesai mengundi kesemua kategori.', 'success');
+        return prev;
+      }
+    });
   };
 
   return (
