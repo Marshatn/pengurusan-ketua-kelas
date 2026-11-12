@@ -5,6 +5,7 @@ export interface ToastMessage {
   id: string;
   type: 'success' | 'error' | 'info';
   message: string;
+  duration?: number;
 }
 
 interface ToastProps {
@@ -29,9 +30,9 @@ const ToastItem: React.FC<{ toast: ToastMessage; onRemove: (id: string) => void 
   useEffect(() => {
     const timer = setTimeout(() => {
       onRemove(toast.id);
-    }, 4000);
+    }, toast.duration ?? 4000);
     return () => clearTimeout(timer);
-  }, [toast.id, onRemove]);
+  }, [toast.id, toast.duration, onRemove]);
 
   return (
     <div

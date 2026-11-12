@@ -117,9 +117,9 @@ export default function App() {
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success', duration?: number) => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type, duration }]);
   };
 
   const removeToast = (id: string) => {
@@ -294,15 +294,15 @@ export default function App() {
       // 2. Persist to Cloud Firestore
       await setDoc(doc(db, 'votes', docId), newRecord);
 
-      // 3. Visual feedback
-      addToast(`Undian berjaya disahkan dan disimpan ke Cloud Firestore!`, 'success');
+      // 3. Visual feedback: Exactly "Undian berjaya disahkan." and disappears after 0.5 seconds
+      addToast('Undian berjaya disahkan.', 'success', 500);
 
       // 4. Advance parent state to next category
       setCurrentCategoryIndex((prev) => Math.min(prev + 1, 3));
     } catch (err: any) {
       console.error('Error writing vote to Firestore:', err);
-      // Even if cloud write has network delay, vote is already kept in local state & storage!
-      addToast('Undian direkodkan ke peranti dan sedang diselaraskan ke pelayan awan.', 'info');
+      // Even if cloud write has network delay, vote is already kept in local state & storage
+      addToast('Undian berjaya disahkan.', 'success', 500);
       setCurrentCategoryIndex((prev) => Math.min(prev + 1, 3));
     }
   };

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Award, CheckCircle2, Lock, Unlock, Sparkles, ThumbsUp, LogOut, Check, ArrowRight } from 'lucide-react';
 import { ClassLeaderData, VoteRecord, UserSession, SystemSettings, VoteCategory, TeacherRecord } from '../types';
 import { TeacherVoterList } from './TeacherVoterList';
+import { VotingProgressBar } from './VotingProgressBar';
 import { sortClassesMerahKuningBiru } from '../data/initialData';
 import { t } from '../translations';
 
@@ -39,6 +40,16 @@ export const TabVoting: React.FC<TabVotingProps> = ({
     classId: string;
     category: VoteCategory;
   } | null>(null);
+
+  const topCandidateListRef = useRef<HTMLDivElement>(null);
+
+  // When advancing or switching category, ensure mobile view always starts from the topmost student
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (topCandidateListRef.current) {
+      topCandidateListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentCategoryIndex]);
 
   const dict = t[lang].votingTab;
 
@@ -125,6 +136,14 @@ export const TabVoting: React.FC<TabVotingProps> = ({
       candidateName: candidate.name,
       classId: candidate.classId,
     });
+
+    // On mobile, ensure the view starts from the topmost student
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (topCandidateListRef.current) {
+        topCandidateListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
   };
 
   return (
@@ -167,6 +186,24 @@ export const TabVoting: React.FC<TabVotingProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Visual Progress Bar Component: Displays categories completed out of total */}
+      <VotingProgressBar
+        userVotes={userVotesInYear}
+        categories={CATEGORIES}
+        currentCategoryIndex={currentCategoryIndex}
+        onSelectCategory={(idx) => {
+          const firstUnvotedIndex = CATEGORIES.findIndex((cat) => !userVotesInYear.some((v) => v.category === cat.id));
+          if (idx > firstUnvotedIndex && firstUnvotedIndex !== -1) {
+            addToast('Sila lengkapkan undian kategori terdahulu terlebih dahulu!', 'error');
+          }
+          setCurrentCategoryIndex(idx);
+        }}
+        lang={lang}
+      />
+
+      {/* Anchor for top of candidate list on mobile - Ensures view starts from topmost student */}
+      <div ref={topCandidateListRef} id="candidate-list-top" className="scroll-mt-16 sm:scroll-mt-20" />
 
       {/* 4 Category Selection Buttons */}
       {(() => {
