@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Megaphone } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { LoginModal } from './components/LoginModal';
 import { TabClasses } from './components/TabClasses';
@@ -445,9 +446,36 @@ export default function App() {
           />
 
           {settings.announcement && (
-            <div className="bg-[#EAB308] text-slate-950 py-2 px-3 text-center text-xs font-extrabold shadow-inner flex items-center justify-center gap-2 border-b border-amber-500 w-full overflow-hidden">
-              <span className="px-1.5 py-0.5 rounded-md bg-[#0F172A] text-amber-300 uppercase text-[9px] tracking-wider font-mono shrink-0">PENGUMUMAN</span>
-              <span className="truncate">{settings.announcement}</span>
+            <div className="bg-[#EAB308] text-slate-950 py-1.5 px-2 sm:px-4 text-xs font-extrabold shadow-inner flex items-center gap-2 border-b border-amber-500 w-full overflow-hidden select-none">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0F172A] text-amber-300 uppercase text-[9px] sm:text-[10px] tracking-wider font-mono shrink-0 shadow-xs z-10">
+                <Megaphone className="w-3 h-3 text-amber-400 shrink-0" />
+                <span>PENGUMUMAN</span>
+              </div>
+
+              {/* Running Ticker / Auto-moving announcement marquee */}
+              <div className="flex-1 overflow-hidden relative flex items-center min-w-0">
+                <div
+                  className="inline-flex items-center gap-8 animate-marquee whitespace-nowrap text-xs font-extrabold text-slate-950 hover:[animation-play-state:paused] active:[animation-play-state:paused] cursor-pointer"
+                  title="Sentuh atau layang untuk jeda (Touch or hover to pause)"
+                >
+                  <span className="flex items-center gap-4">
+                    <span>{settings.announcement}</span>
+                    <span className="text-amber-800 font-black text-sm">✦</span>
+                  </span>
+                  <span className="flex items-center gap-4">
+                    <span>{settings.announcement}</span>
+                    <span className="text-amber-800 font-black text-sm">✦</span>
+                  </span>
+                  <span className="flex items-center gap-4">
+                    <span>{settings.announcement}</span>
+                    <span className="text-amber-800 font-black text-sm">✦</span>
+                  </span>
+                  <span className="flex items-center gap-4">
+                    <span>{settings.announcement}</span>
+                    <span className="text-amber-800 font-black text-sm">✦</span>
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 

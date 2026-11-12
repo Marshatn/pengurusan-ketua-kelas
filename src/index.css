@@ -195,3 +195,24 @@ html, body {
   animation: diagonalShimmer 10s ease-in-out infinite;
   will-change: transform, opacity;
 }
+
+/* Continuous Running Ticker / Auto-moving Marquee for Announcement Bar */
+@keyframes marqueeScroll {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  animation: marqueeScroll 24s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover,
+.animate-marquee:active {
+  animation-play-state: paused;
+}
