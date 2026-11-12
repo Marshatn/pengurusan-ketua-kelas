@@ -20,6 +20,7 @@ interface TabAdminProps {
   votes: any[];
   checklist: any[];
   onImportData: (data: any) => void;
+  onSeedDefaultClasses: () => void;
 }
 
 export const TabAdmin: React.FC<TabAdminProps> = ({
@@ -39,6 +40,7 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
   votes,
   checklist,
   onImportData,
+  onSeedDefaultClasses,
 }) => {
   const [announcementText, setAnnouncementText] = useState(settings.announcement);
   const [newTeacherName, setNewTeacherName] = useState('');
@@ -405,6 +407,14 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
               className="hidden"
             />
           </label>
+
+          <button
+            onClick={onSeedDefaultClasses}
+            className="flex items-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl transition shadow-md cursor-pointer"
+          >
+            <Database className="w-4 h-4" />
+            <span>Restore / Seed Default Classes (1M–6B) ke Firestore</span>
+          </button>
         </div>
 
         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">Tetapan Tetapan Semula (Reset Data)</h4>

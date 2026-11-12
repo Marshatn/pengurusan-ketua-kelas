@@ -133,6 +133,10 @@ export default function App() {
         const list: TeacherRecord[] = [];
         snap.forEach(d => list.push(d.data() as TeacherRecord));
         if (list.length > 0) setTeachers(list);
+      } else {
+        INITIAL_TEACHER_RECORDS.filter((t) => !t.name.toUpperCase().includes('ERIC CHUNG')).forEach((th) => {
+          setDoc(doc(db, 'teachers', th.ic), th).catch(console.error);
+        });
       }
     }, (err) => console.error('Teachers sync error:', err));
 
@@ -148,6 +152,10 @@ export default function App() {
         if (Object.keys(byYear).length > 0) {
           setClassesByYear(byYear);
         }
+      } else {
+        INITIAL_CLASSES_2026.forEach((c) => {
+          setDoc(doc(db, 'classes', `2026_${c.id}`), { ...c, year: 2026 }).catch(console.error);
+        });
       }
     }, (err) => console.error('Classes sync error:', err));
 
@@ -273,6 +281,14 @@ export default function App() {
   const handleResetClasses = () => {
     setClassesByYear({ 2026: INITIAL_CLASSES_2026 });
     addToast('Data kelas telah ditetapkan semula.', 'info');
+  };
+
+  const handleSeedDefaultClasses = () => {
+    INITIAL_CLASSES_2026.forEach((c) => {
+      setDoc(doc(db, 'classes', `2026_${c.id}`), { ...c, year: 2026 }).catch(console.error);
+    });
+    setClassesByYear((prev) => ({ ...prev, 2026: INITIAL_CLASSES_2026 }));
+    addToast('Kelas 1M hingga 6B berjaya disemai (seed) ke Cloud Firestore!', 'success');
   };
 
   const handleResetVotes = () => {
@@ -422,6 +438,7 @@ export default function App() {
                 votes={votes}
                 checklist={checklist}
                 onImportData={handleImportData}
+                onSeedDefaultClasses={handleSeedDefaultClasses}
               />
             )}
           </main>
