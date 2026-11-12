@@ -15,7 +15,7 @@ export const INITIAL_CLASSES_2026: ClassLeaderData[] = [
     "grade": 1,
     "teacherName": "CHIA MEE HIE",
     "headPrefect": "GENEVIE JANUARIUS",
-    "assistantPrefect": "IRREES ADRIEANNA SAKURA BINTI MUHAMMAD NUR AKMAL"
+    "assistantPrefect": "ADELYNE GOH"
   },
   {
     "id": "1B",
@@ -23,7 +23,7 @@ export const INITIAL_CLASSES_2026: ClassLeaderData[] = [
     "grade": 1,
     "teacherName": "JENNIFER LO YUNG TING",
     "headPrefect": "HAYSLEY NICOLE LIM",
-    "assistantPrefect": "\tLIM SU XUAN"
+    "assistantPrefect": "LIM SU XUAN"
   },
   {
     "id": "2M",
