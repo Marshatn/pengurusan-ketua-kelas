@@ -12,7 +12,7 @@ import { NeonBackground } from './components/NeonBackground';
 import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
 import { db } from './firebase';
-import { collection, doc, onSnapshot, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 export default function App() {
   const [lang, setLang] = useState<'ms' | 'zh'>('ms');
@@ -25,7 +25,7 @@ export default function App() {
     return { role: 'admin', username: 'admin', name: 'Admin' };
   });
 
-  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [activeTab, setActiveTab] = useState<string>('classes');
 
   // Teachers master list with Name and IC support
@@ -85,13 +85,8 @@ export default function App() {
     return { 2026: INITIAL_CLASSES_2026 };
   });
 
-  const [votes, setVotes] = useState<VoteRecord[]>(() => {
-    const saved = localStorage.getItem('sistem_pemimpin_votes');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
-    }
-    return [];
-  });
+  // Votes live directly from Cloud Firestore to guarantee cross-device consistency
+  const [votes, setVotes] = useState<VoteRecord[]>([]);
 
   const [checklist, setChecklist] = useState<DailyChecklistTask[]>(() => {
     const saved = localStorage.getItem('sistem_pemimpin_checklist');
@@ -125,6 +120,9 @@ export default function App() {
     const unsubSettings = onSnapshot(doc(db, 'settings', 'main'), (snap) => {
       if (snap.exists()) {
         setSettings(snap.data() as SystemSettings);
+      } else {
+        // Auto-seed default settings to Cloud Firestore if missing
+        setDoc(doc(db, 'settings', 'main'), INITIAL_SETTINGS).catch(console.error);
       }
     }, (err) => console.error('Settings sync error:', err));
 
@@ -150,6 +148,9 @@ export default function App() {
           byYear[yr].push(data);
         });
         if (Object.keys(byYear).length > 0) {
+          for (const yr of Object.keys(byYear)) {
+            byYear[Number(yr)].sort((a, b) => a.id.localeCompare(b.id));
+          }
           setClassesByYear(byYear);
         }
       } else {
@@ -161,7 +162,19 @@ export default function App() {
 
     const unsubVotes = onSnapshot(collection(db, 'votes'), (snap) => {
       const list: VoteRecord[] = [];
-      snap.forEach(d => list.push(d.data() as VoteRecord));
+      snap.forEach(d => {
+        const data = d.data();
+        list.push({
+          id: d.id,
+          year: Number(data.year) || 2026,
+          voterId: String(data.voterId || ''),
+          voterName: String(data.voterName || ''),
+          category: data.category,
+          candidateName: String(data.candidateName || ''),
+          classId: String(data.classId || ''),
+          timestamp: String(data.timestamp || new Date().toISOString()),
+        });
+      });
       list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setVotes(list);
     }, (err) => console.error('Votes sync error:', err));
@@ -191,10 +204,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('sistem_pemimpin_classes', JSON.stringify(classesByYear));
   }, [classesByYear]);
-
-  useEffect(() => {
-    localStorage.setItem('sistem_pemimpin_votes', JSON.stringify(votes));
-  }, [votes]);
 
   useEffect(() => {
     localStorage.setItem('sistem_pemimpin_checklist', JSON.stringify(checklist));
@@ -241,14 +250,24 @@ export default function App() {
     }
   };
 
-  const handleCastVote = (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => {
+  const handleCastVote = async (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => {
+    // Unique deterministic document ID per voter per category per year prevents duplicates across devices
+    const cleanVoterId = vote.voterId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docId = `${vote.year}_${vote.category}_${cleanVoterId}`;
     const newRecord: VoteRecord = {
       ...vote,
-      id: Math.random().toString(36).substring(2, 9),
+      id: docId,
       timestamp: new Date().toISOString(),
     };
-    setVotes((prev) => [newRecord, ...prev]);
-    setDoc(doc(db, 'votes', newRecord.id), newRecord).catch(console.error);
+
+    try {
+      // Direct write to Cloud Firestore immediately
+      await setDoc(doc(db, 'votes', docId), newRecord);
+      addToast(`Undian anda bagi kategori ini berjaya direkodkan ke Cloud Firestore!`, 'success');
+    } catch (err: any) {
+      console.error('Error writing vote to Firestore:', err);
+      addToast('Ralat menyimpan undian ke cloud: ' + (err.message || 'Sila cuba lagi'), 'error');
+    }
   };
 
   const handleToggleChecklist = (id: string) => {
@@ -268,9 +287,15 @@ export default function App() {
     addToast('Status tugasan dikemaskini!', 'success');
   };
 
-  const handleUpdateSettings = (newSettings: SystemSettings) => {
+  const handleUpdateSettings = async (newSettings: SystemSettings) => {
     setSettings(newSettings);
-    setDoc(doc(db, 'settings', 'main'), newSettings).catch(console.error);
+    try {
+      await setDoc(doc(db, 'settings', 'main'), newSettings);
+      addToast('Pengumuman sekolah berjaya dikemaskini dan disegerakkan ke pangkalan data awan!', 'success');
+    } catch (err: any) {
+      console.error('Error saving settings to Firestore:', err);
+      addToast('Ralat menyimpan pengumuman ke cloud: ' + (err.message || 'Sila cuba lagi'), 'error');
+    }
   };
 
   const handleResetTeachers = () => {
@@ -291,9 +316,18 @@ export default function App() {
     addToast('Kelas 1M hingga 6B berjaya disemai (seed) ke Cloud Firestore!', 'success');
   };
 
-  const handleResetVotes = () => {
-    setVotes([]);
-    addToast('Data undian telah ditetapkan semula.', 'info');
+  const handleResetVotes = async () => {
+    try {
+      const snap = await getDocs(collection(db, 'votes'));
+      const batchPromises = snap.docs.map((d) => deleteDoc(d.ref));
+      await Promise.all(batchPromises);
+      setVotes([]);
+      addToast('Semua data undian telah dipadam sepenuhnya dari Cloud Firestore.', 'info');
+    } catch (err: any) {
+      console.error('Error deleting votes:', err);
+      setVotes([]);
+      addToast('Data undian telah ditetapkan semula.', 'info');
+    }
   };
 
   const handleImportData = (data: any) => {

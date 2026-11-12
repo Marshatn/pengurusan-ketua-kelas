@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Lock, Unlock, RefreshCw, Database, Download, Upload, Megaphone, ShieldCheck, UserPlus, Trash2, Users, Search, AlertTriangle, KeyRound } from 'lucide-react';
 import { SystemSettings, UserSession, TeacherRecord } from '../types';
 import { t } from '../translations';
 
 interface TabAdminProps {
   settings: SystemSettings;
-  onUpdateSettings: (settings: SystemSettings) => void;
+  onUpdateSettings: (settings: SystemSettings) => void | Promise<void>;
   onResetTeachers: () => void;
   onResetClasses: () => void;
   onResetVotes: () => void;
@@ -48,6 +48,13 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
   const [teacherSearch, setTeacherSearch] = useState('');
   const [teacherToDelete, setTeacherToDelete] = useState<TeacherRecord | null>(null);
 
+  // Keep announcement text synced with live Cloud Firestore updates
+  useEffect(() => {
+    if (settings?.announcement !== undefined) {
+      setAnnouncementText(settings.announcement);
+    }
+  }, [settings?.announcement]);
+
   const dict = t[lang].adminTab;
 
   if (user.role !== 'admin') {
@@ -66,11 +73,10 @@ export const TabAdmin: React.FC<TabAdminProps> = ({
     addToast(updated.votingOpen ? 'Undian telah DIBUKA kepada pengundi.' : 'Undian telah DITUTUP.', updated.votingOpen ? 'success' : 'info');
   };
 
-  const handleSaveAnnouncement = (e: React.FormEvent) => {
+  const handleSaveAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated = { ...settings, announcement: announcementText };
-    onUpdateSettings(updated);
-    addToast('Pengumuman sekolah berjaya dikemaskini!', 'success');
+    await onUpdateSettings(updated);
   };
 
   const handleAddTeacherSubmit = (e: React.FormEvent) => {

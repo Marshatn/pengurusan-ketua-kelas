@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setLang,
 }) => {
   const dict = t[lang];
-  const currentYear = new Date().getFullYear();
+  const currentYear = 2026;
 
   return (
     <>

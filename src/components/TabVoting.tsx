@@ -7,7 +7,7 @@ import { t } from '../translations';
 interface TabVotingProps {
   classesData: ClassLeaderData[];
   votes: VoteRecord[];
-  onCastVote: (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => void;
+  onCastVote: (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => void | Promise<void>;
   selectedYear: number;
   user: UserSession;
   settings: SystemSettings;
@@ -93,7 +93,7 @@ export const TabVoting: React.FC<TabVotingProps> = ({
 
   const currentCategoryVoted = userVotesInYear.some((v) => v.category === activeCategory);
 
-  const handleConfirmVote = () => {
+  const handleConfirmVote = async () => {
     if (!confirmModalCandidate) return;
 
     if (!settings.votingOpen && user.role !== 'admin') {
@@ -102,17 +102,17 @@ export const TabVoting: React.FC<TabVotingProps> = ({
       return;
     }
 
-    onCastVote({
+    const candidate = confirmModalCandidate;
+    setConfirmModalCandidate(null);
+
+    await onCastVote({
       year: selectedYear,
       voterId: user.username,
       voterName: user.name,
-      category: confirmModalCandidate.category,
-      candidateName: confirmModalCandidate.name,
-      classId: confirmModalCandidate.classId,
+      category: candidate.category,
+      candidateName: candidate.name,
+      classId: candidate.classId,
     });
-
-    addToast(`Berjaya mengundi ${confirmModalCandidate.name}!`, 'success');
-    setConfirmModalCandidate(null);
   };
 
   return (
