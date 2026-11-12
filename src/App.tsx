@@ -11,6 +11,8 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { NeonBackground } from './components/NeonBackground';
 import { INITIAL_CLASSES_2026, INITIAL_CHECKLIST, INITIAL_SETTINGS, INITIAL_TEACHER_RECORDS } from './data/initialData';
 import { ClassLeaderData, VoteRecord, DailyChecklistTask, SystemSettings, UserSession, TeacherRecord } from './types';
+import { db } from './firebase';
+import { collection, doc, onSnapshot, setDoc, deleteDoc } from 'firebase/firestore';
 
 export default function App() {
   const [lang, setLang] = useState<'ms' | 'zh'>('ms');
@@ -118,6 +120,61 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Real-time Firestore Sync Listeners for cross-device sync
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'main'), (snap) => {
+      if (snap.exists()) {
+        setSettings(snap.data() as SystemSettings);
+      }
+    }, (err) => console.error('Settings sync error:', err));
+
+    const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snap) => {
+      if (!snap.empty) {
+        const list: TeacherRecord[] = [];
+        snap.forEach(d => list.push(d.data() as TeacherRecord));
+        if (list.length > 0) setTeachers(list);
+      }
+    }, (err) => console.error('Teachers sync error:', err));
+
+    const unsubClasses = onSnapshot(collection(db, 'classes'), (snap) => {
+      if (!snap.empty) {
+        const byYear: { [year: number]: ClassLeaderData[] } = {};
+        snap.forEach(d => {
+          const data = d.data() as ClassLeaderData & { year?: number };
+          const yr = data.year || 2026;
+          if (!byYear[yr]) byYear[yr] = [];
+          byYear[yr].push(data);
+        });
+        if (Object.keys(byYear).length > 0) {
+          setClassesByYear(byYear);
+        }
+      }
+    }, (err) => console.error('Classes sync error:', err));
+
+    const unsubVotes = onSnapshot(collection(db, 'votes'), (snap) => {
+      const list: VoteRecord[] = [];
+      snap.forEach(d => list.push(d.data() as VoteRecord));
+      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setVotes(list);
+    }, (err) => console.error('Votes sync error:', err));
+
+    const unsubChecklist = onSnapshot(collection(db, 'checklist'), (snap) => {
+      if (!snap.empty) {
+        const list: DailyChecklistTask[] = [];
+        snap.forEach(d => list.push(d.data() as DailyChecklistTask));
+        setChecklist(list);
+      }
+    }, (err) => console.error('Checklist sync error:', err));
+
+    return () => {
+      unsubSettings();
+      unsubTeachers();
+      unsubClasses();
+      unsubVotes();
+      unsubChecklist();
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('sistem_pemimpin_teachers_v2', JSON.stringify(teachers));
     localStorage.setItem('sistem_pemimpin_teachers', JSON.stringify(teachers.map((t) => t.name)));
@@ -155,6 +212,7 @@ export default function App() {
       const newList = yearList.map((item) => (item.id === updated.id ? updated : item));
       return { ...prev, [selectedYear]: newList };
     });
+    setDoc(doc(db, 'classes', `${selectedYear}_${updated.id}`), { ...updated, year: selectedYear }).catch(console.error);
   };
 
   const teacherNames = teachers.map((t) => t.name);
@@ -164,10 +222,15 @@ export default function App() {
     const cleanIc = ic.trim().replace(/[-\s]/g, '');
     if (teachers.some((t) => t.name.toUpperCase() === cleanName || t.ic === cleanIc)) return;
     setTeachers((prev) => [...prev, { name: cleanName, ic: cleanIc }].sort((a, b) => a.name.localeCompare(b.name)));
+    setDoc(doc(db, 'teachers', cleanIc), { name: cleanName, ic: cleanIc }).catch(console.error);
   };
 
   const handleRemoveTeacher = (name: string) => {
+    const target = teachers.find(t => t.name.toUpperCase() === name.toUpperCase());
     setTeachers((prev) => prev.filter((th) => th.name.toUpperCase() !== name.toUpperCase()));
+    if (target) {
+      deleteDoc(doc(db, 'teachers', target.ic)).catch(console.error);
+    }
   };
 
   const handleCastVote = (vote: Omit<VoteRecord, 'id' | 'timestamp'>) => {
@@ -177,13 +240,29 @@ export default function App() {
       timestamp: new Date().toISOString(),
     };
     setVotes((prev) => [newRecord, ...prev]);
+    setDoc(doc(db, 'votes', newRecord.id), newRecord).catch(console.error);
   };
 
   const handleToggleChecklist = (id: string) => {
+    let targetTask: DailyChecklistTask | undefined;
     setChecklist((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item))
+      prev.map((item) => {
+        if (item.id === id) {
+          targetTask = { ...item, completed: !item.completed };
+          return targetTask;
+        }
+        return item;
+      })
     );
+    if (targetTask) {
+      setDoc(doc(db, 'checklist', id), targetTask).catch(console.error);
+    }
     addToast('Status tugasan dikemaskini!', 'success');
+  };
+
+  const handleUpdateSettings = (newSettings: SystemSettings) => {
+    setSettings(newSettings);
+    setDoc(doc(db, 'settings', 'main'), newSettings).catch(console.error);
   };
 
   const handleResetTeachers = () => {
@@ -203,12 +282,37 @@ export default function App() {
 
   const handleImportData = (data: any) => {
     try {
-      if (data.teachers && Array.isArray(data.teachers)) setTeachers(data.teachers);
-      if (data.classesByYear && typeof data.classesByYear === 'object') setClassesByYear(data.classesByYear);
-      if (data.votes && Array.isArray(data.votes)) setVotes(data.votes);
-      if (data.checklist && Array.isArray(data.checklist)) setChecklist(data.checklist);
-      if (data.settings && typeof data.settings === 'object') setSettings(data.settings);
-      addToast('Data sistem berjaya diimport daripada fail JSON!', 'success');
+      if (data.teachers && Array.isArray(data.teachers)) {
+        setTeachers(data.teachers);
+        data.teachers.forEach((th: TeacherRecord) => {
+          setDoc(doc(db, 'teachers', th.ic), th).catch(console.error);
+        });
+      }
+      if (data.classesByYear && typeof data.classesByYear === 'object') {
+        setClassesByYear(data.classesByYear);
+        for (const [yr, list] of Object.entries(data.classesByYear)) {
+          (list as ClassLeaderData[]).forEach((c) => {
+            setDoc(doc(db, 'classes', `${yr}_${c.id}`), { ...c, year: Number(yr) }).catch(console.error);
+          });
+        }
+      }
+      if (data.votes && Array.isArray(data.votes)) {
+        setVotes(data.votes);
+        data.votes.forEach((v: VoteRecord) => {
+          setDoc(doc(db, 'votes', v.id), v).catch(console.error);
+        });
+      }
+      if (data.checklist && Array.isArray(data.checklist)) {
+        setChecklist(data.checklist);
+        data.checklist.forEach((ch: DailyChecklistTask) => {
+          setDoc(doc(db, 'checklist', ch.id), ch).catch(console.error);
+        });
+      }
+      if (data.settings && typeof data.settings === 'object') {
+        setSettings(data.settings);
+        setDoc(doc(db, 'settings', 'main'), data.settings).catch(console.error);
+      }
+      addToast('Data sistem berjaya diimport dan disync ke cloud!', 'success');
     } catch (err) {
       console.error(err);
       addToast('Gagal mengimport fail JSON. Format tidak sah.', 'error');
@@ -303,7 +407,7 @@ export default function App() {
             {activeTab === 'admin' && (
               <TabAdmin
                 settings={settings}
-                onUpdateSettings={setSettings}
+                onUpdateSettings={handleUpdateSettings}
                 onResetTeachers={handleResetTeachers}
                 onResetClasses={handleResetClasses}
                 onResetVotes={handleResetVotes}

@@ -116,20 +116,6 @@ export const TabClasses: React.FC<TabClassesProps> = ({
     </tbody>
   </table>
 
-  <div class="signatures">
-    <div class="sign-box">
-      <div class="sign-line"></div>
-      <strong>Disediakan Oleh:</strong><br>
-      Guru Kelas / Disiplin<br>
-      SJK (C) Chung Hwa Kota Belud
-    </div>
-    <div class="sign-box">
-      <div class="sign-line"></div>
-      <strong>Disahkan Oleh:</strong><br>
-      Guru Besar / Penolong Kanan HEM<br>
-      SJK (C) Chung Hwa Kota Belud
-    </div>
-  </div>
 </body>
 </html>`;
   };
@@ -467,19 +453,6 @@ export const TabClasses: React.FC<TabClassesProps> = ({
                 </table>
               </div>
 
-              {/* Signatures */}
-              <div className="mt-12 flex justify-between text-xs pt-4 border-t border-slate-300">
-                <div className="text-center w-48">
-                  <div className="h-14 border-b border-slate-800" />
-                  <p className="mt-2 font-bold text-slate-900">Disediakan Oleh:</p>
-                  <p className="text-[11px] text-slate-600">Guru Kelas / Disiplin</p>
-                </div>
-                <div className="text-center w-48">
-                  <div className="h-14 border-b border-slate-800" />
-                  <p className="mt-2 font-bold text-slate-900">Disahkan Oleh:</p>
-                  <p className="text-[11px] text-slate-600">Guru Besar / PK HEM</p>
-                </div>
-              </div>
             </div>
 
             {/* Modal Footer */}
