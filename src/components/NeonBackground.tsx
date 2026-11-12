@@ -8,59 +8,44 @@ export const NeonBackground: React.FC<NeonBackgroundProps> = ({ variant = 'app' 
   const isLogin = variant === 'login';
 
   return (
-    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-sky-50 via-white to-blue-50">
-      {/* Luminous Ambient Glowing Blobs with Slow Floating Movement */}
+    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-[#D8D8EC]">
+      {/* Dynamic Animated Diagonal Ribbon Background (Derived from user attachment image_3324324a.png) */}
       <div className="absolute inset-0">
-        {/* Luminous Glow 1: Soft Sky Cyan */}
-        <div
-          className={`absolute -top-24 -left-24 w-[600px] h-[600px] rounded-full bg-cyan-200/60 blur-[120px] animate-neon-orb-a ${
-            isLogin ? 'opacity-80' : 'opacity-60'
-          }`}
-        />
+        {/* Ambient Underglow Orbs matching the soft lavender & icy blue hues */}
+        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-indigo-300/50 blur-[130px] animate-neon-orb-a" />
+        <div className="absolute -bottom-32 -right-32 w-[650px] h-[650px] rounded-full bg-violet-200/60 blur-[140px] animate-neon-orb-b" />
 
-        {/* Luminous Glow 2: Warm Sunny Gold */}
+        {/* Primary Moving Layer 1: Diagonal Gradient Bands */}
         <div
-          className={`absolute -bottom-28 -right-28 w-[650px] h-[650px] rounded-full bg-amber-200/50 blur-[130px] animate-neon-orb-b ${
-            isLogin ? 'opacity-70' : 'opacity-50'
-          }`}
-        />
-
-        {/* Luminous Glow 3: Refreshing Royal Blue / Azure */}
-        <div
-          className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full bg-blue-200/50 blur-[110px] animate-neon-orb-c opacity-50"
-        />
-
-        {/* Luminous Glow 4: Soft Lilac / Violet Whisper */}
-        <div
-          className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] rounded-full bg-indigo-200/40 blur-[100px] animate-neon-orb-a opacity-40"
-        />
-
-        {/* Slow Moving Pristine Blue Wave Ribbon Layer 1 */}
-        <div
-          className={`absolute -inset-16 bg-cover bg-center bg-no-repeat animate-neon-drift-1 filter saturate-125 contrast-105 ${
-            isLogin ? 'opacity-85' : 'opacity-45'
+          className={`absolute -inset-16 bg-cover bg-center bg-no-repeat animate-diagonal-flow-1 filter saturate-110 contrast-105 ${
+            isLogin ? 'opacity-95' : 'opacity-85'
           }`}
           style={{
-            backgroundImage: "url('/bg_wave.png')",
+            backgroundImage: "url('/assets/aistudio/image_3324324a.png')",
           }}
         />
 
-        {/* Slow Moving Pristine Wave Layer 2 (Cross-Drift for ethereal slow depth) */}
+        {/* Secondary Moving Layer 2: Diagonal Flow Drift for Multidimensional Fluid Depth */}
         <div
-          className={`absolute -inset-20 bg-cover bg-center bg-no-repeat animate-neon-drift-2 filter saturate-110 opacity-30 mix-blend-multiply`}
+          className="absolute -inset-20 bg-cover bg-center bg-no-repeat animate-diagonal-flow-2 filter saturate-125 opacity-40 mix-blend-color-burn"
           style={{
-            backgroundImage: "url('/bg_wave.png')",
+            backgroundImage: "url('/assets/aistudio/image_3324324a.png')",
           }}
         />
+
+        {/* Diagonal Light Shimmer Beam traveling along the angled bands */}
+        <div className="absolute -inset-full bg-gradient-to-br from-transparent via-white/30 to-transparent pointer-events-none animate-diagonal-shimmer" />
       </div>
 
-      {/* Soft Radial Vignette for Balanced Center Brightness */}
-      <div className="absolute inset-0 bg-radial from-transparent via-white/20 to-sky-100/40" />
+      {/* Gentle Radial Vignette for Balanced Center Contrast */}
+      <div className="absolute inset-0 bg-radial from-transparent via-transparent to-slate-900/15" />
 
-      {/* Main app screen overlay: maintains pristine clarity and readability for all text & cards */}
-      {!isLogin && (
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]" />
-      )}
+      {/* Paparan Main Menu & Login Overlay: Maintains pristine contrast for all text, cards & buttons */}
+      <div
+        className={`absolute inset-0 ${
+          isLogin ? 'bg-slate-950/15 backdrop-blur-[0.5px]' : 'bg-white/20 backdrop-blur-[0.5px]'
+        }`}
+      />
     </div>
   );
 };
